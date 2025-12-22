@@ -1,0 +1,541 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+  background: #fff;
+}
+
+
+#content-wrapper {
+  display: flex;
+  flex: 1; /* Chiếm hết chiều ngang còn lại */
+  transition: width 0.5s ease-in-out; /* Thêm transition cho width nếu cần */
+}
+
+#explanation-wrapper {
+    display: flex;
+    flex-direction: row; 
+    height: 100vh;
+    width: 0; /* Ẩn ban đầu */
+    opacity: 0; /* Ẩn mờ ban đầu */
+    overflow: hidden;
+    transition: width 0.7s ease-in-out, opacity 0.7s ease-in-out; 
+}
+ 
+#controls {
+  width: 250px;
+  background: #000;
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  margin-top: auto;
+  align-self: center;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#controls button {
+  background: #424141;
+  font-size: 1em;
+  border: none;
+  padding: 10px;
+  color: white;
+  cursor: pointer;
+  border-radius: 8px;
+  
+}
+
+#controls button:hover {
+  background: #333;
+}
+
+.input-group {
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group input {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+ 
+#main {
+  flex: 1; /* Chiếm hết không gian còn lại */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  transition: width 0.7s ease-in-out;
+}
+
+#content-wrapper.explain #main {
+  max-width: none;
+  width: calc(100vw - 1000px);
+}
+
+
+#content-wrapper.explain #explanation-wrapper {
+width: 850px; 
+opacity: 1; 
+}
+
+/* #canvas {
+  width: 98%;
+  height: 80%;
+  flex: 1;
+  margin: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */
+
+#canvas {
+  width: 98%;
+  height: 80%;
+  flex: 1;
+  margin: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;  
+}
+
+
+#graph {
+  width: 90%;
+  height: 100%;
+}
+
+ 
+#footer {
+  background: #0e0e0e;
+  color: #fff;
+  width: 100%;
+  padding: 40px 0px 50px 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  font-size: 1em;
+}
+
+#footer button {
+  
+  background: #f9c74f;
+  border: none;
+  padding: 15px 21px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: bold;
+}
+
+ 
+#steps {
+  width: 350px;
+  min-width: 0px;
+  background: #000;
+  padding: 20px;
+  overflow-y: auto;  
+  flex-shrink: 0;
+}
+
+#steps h3 {
+  margin-top: 0;
+}
+
+.state-node {
+  color: #9ca3af; /* màu ban đầu */
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.25s, background 0.25s;
+}
+
+ 
+#dist-state, #pre-state {
+    color: #f9c74f;  
+}
+
+#t-state, #q-state, #h-state {
+    color: #66ff66;  
+}
+
+#steps .step-group-title {
+    font-size: 1em;
+    font-weight: bold;
+    color: #f9c74f;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #444;
+}
+
+#steps .step {
+  background: #333;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+#steps .step.active {
+  background: #f9c74f; /* Màu nền vàng đậm */
+  color: #000; /* Màu chữ đen */
+  font-weight: bold;
+  box-shadow: 0 0 15px 5px rgba(249, 199, 79, 1); 
+  transform: scale(1.03); /* Phóng to rõ rệt hơn */
+}
+
+/* Step chưa active thì mờ hơn */
+#steps .step {
+  opacity: 0.6;
+  transition: all 0.25s ease;
+}
+
+#steps .step.active {
+  opacity: 1;
+}
+
+/* Đồng bộ màu text bên trong */
+#steps .step.active .step-text,
+#steps .step.active .step-title,
+#steps .step.active .step-preview {
+  color: #000 !important;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: bold;
+  color: #888; 
+}
+
+.node-label-dist {
+font-size: 12px;
+font-weight: bold;
+    color: #888; /
+}
+.node-label-pre {
+font-size: 12px;
+font-weight: bold;
+    color: #888; 
+}
+ 
+
+#notification {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 0.5s;
+  z-index: 1000;
+}
+
+#notification.show {
+  opacity: 1;
+}
+
+#notification.success {
+  background-color: #4caf50;
+}
+
+#notification.error {
+  background-color: #f44336;
+}
+ 
+.step-detail-container {
+    width: 98%;  
+    padding: 10px;
+    border-top: 1px solid #333;
+    margin: 10px auto;  
+    background: #1c1c1c;
+    color: #fff;
+    border-radius: 8px;
+     
+}
+
+.step-detail-container h3 {
+    color: #f9c74f;
+    margin-top: 0;
+}
+
+h3{
+  color: #ff9900;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+}
+
+pre span {
+    display: block;       /* mỗi span trên một dòng */
+    line-height: 0;     /* khoảng cách giữa các dòng */
+    margin: 0;            /* loại bỏ margin thừa */
+    white-space: pre;     /* giữ khoảng trắng và xuống dòng nguyên bản */
+}
+
+
+
+
+.step-detail-container .explain {
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+#state-display {
+    display: none;
+    background: #1a1a1a;  
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;  
+    border: 1px solid #535252;
+}
+
+#state-display h3 {
+    color: #FFD700;  
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+#state-display .state-item {
+    font-size: 15px;
+    margin-bottom: 5px;
+    font-family: 'Courier New', monospace;
+    word-wrap: break-word;
+}
+
+.state-item {
+  color: #9ca3af;   /* xám nhạt – mặc định */
+  font-family: "Courier New", monospace;
+}
+
+.state-node {
+  color: inherit;   /* 👈 kế thừa màu xám */
+}
+
+
+ 
+#state-display #dist-state, 
+#state-display #pre-state {
+    color: #f9c74f; 
+    font-weight: bold;
+}
+
+
+#state-display #stateT {
+    color: #1565c0;
+    Font-weight: bold;
+}
+
+#state-display #stateH {
+    color: #ffc107;
+    Font-weight: bold;
+}
+
+#state-display #stateQ {
+    color: #00e676;
+    Font-weight: bold;
+}
+
+
+ 
+#steps .step {
+    background: #333;
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#steps .step:hover {
+    background: #444;
+}
+
+
+#steps .step.active .step-text {
+    color: #1c1c1c;
+}
+
+#steps .state-preview {
+    font-size: 1em;
+    color: #aaa;
+    display: flex;
+    flex-direction: column;
+    padding-left: 5px;
+    border-left: 2px solid #555;
+    margin-top: 5px;
+}
+
+#steps .step.active .state-preview {
+    border-left-color: #1c1c1c;
+}
+
+#steps .state-preview .preview-t {
+    color: #66ff66;
+}
+
+#steps .state-preview .preview-dist {
+    color: #a3e635;  
+}
+
+ 
+/* .link-text {
+    fill: #000 !important;  
+    font-weight: bold;
+}
+
+.link-group text {
+    fill: #000 !important;
+} */
+
+.link-text {
+fill: #888 !important; 
+font-weight: bold;
+}
+
+ 
+.link-group text {
+fill: #888 !important; /* Đổi từ #000 sang XÁM cho trọng số SVG */
+}
+#color-legend {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  width: 190px;
+  padding: 10px 12px;
+
+  border-radius: 8px;
+  border: 1px solid #444;
+
+  font-size: 13px;
+  pointer-events: none; /* không chặn kéo node */
+}
+
+
+#color-legend h4 {
+  margin: 0 0 8px;
+  color: #000;
+  font-size: 15px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.legend-color.yellow { background: #ffc107; }
+.legend-color.red    { background: #e53935; }
+.legend-color.green  { background: #00e676; }
+.legend-color.blue   { background: #1976d2; }
+
+#pseudocode-panel {
+  width:500px;
+  min-width: 350px;
+  font-size: 1em;
+  background: #111;
+  color: #ffffff;
+  padding: 15px;
+  flex-shrink: 0;
+  font-family: "Courier New", monospace;
+}
+
+#pseudocode-panel span {
+  display: block;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.25s;
+}
+
+#pseudocode-panel span.active {
+  background: #f9c74f;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(249,199,79,0.6);
+  padding: 15px;
+}
+
+
+.step-entry {
+  margin: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  cursor: pointer;
+  color: #ffffff;               
+  opacity: 0.9;
+  transition: all 0.25s ease;
+}
+
+.step-entry.active {
+  background: #f9c74f;
+  color: #000000;         
+  font-weight: bold;
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(249, 199, 79, 0.8);
+  transform: scale(1.01);
+}
+
+#steps .step-entry.active {
+  color: #000 !important;
+  padding: 15px;
+}
+
+
+.step-entry {
+  font-size: 16px;          /* 👈 size chuẩn */
+  line-height: 1.4;
+}
+
+/* STEP active – KHÔNG đổi size */
+.step-entry.active {
+  font-size: 18px;
+}
+
+/* PSEUDOCODE */
+#pseudocode-panel {
+  font-family: "Courier New", Consolas, monospace;
+  font-size: 15px;          
+}
+
+/* Mỗi dòng pseudocode */
+#pseudocode-panel span {
+  font-size: 15px;
+}
