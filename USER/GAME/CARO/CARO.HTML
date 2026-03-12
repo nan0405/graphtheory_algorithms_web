@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cờ Caro 9x9 — NEON ARENA</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --neon-purple: #a855f7;
+            --neon-green: #22c55e;
+            --neon-red: #ff4d6d;
+            --bg-deep: #030712;
+            --bg-card: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(0, 212, 255, 0.15);
+            --text-main: #e2e8f0;
+            --text-dim: #64748b;
+            --cell-bg: rgba(15, 23, 42, 0.9);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* BACKGROUND */
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 60% at 10% 10%, rgba(168, 85, 247, .12), transparent),
+                radial-gradient(ellipse 60% 50% at 90% 90%, rgba(0, 212, 255, .10), transparent),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0, 212, 255, .04), transparent);
+            animation: bgPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            0% {
+                opacity: .7
+            }
+
+            50% {
+                opacity: 1
+            }
+
+            100% {
+                opacity: .6
+            }
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, .03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, .03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        #particles {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFly 1.4s ease-out forwards;
+        }
+
+        @keyframes particleFly {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* ============================================
+     MAIN LAYOUT — full page wrapper
+  ============================================ */
+        .page {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1100px;
+            padding: 20px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Top header — full width */
+        header {
+            width: 100%;
+            text-align: center;
+            padding-top: 6px;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(20px, 3.5vw, 34px);
+            font-weight: 900;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 16px rgba(0, 212, 255, .5));
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% {
+                filter: drop-shadow(0 0 12px rgba(0, 212, 255, .4));
+            }
+
+            100% {
+                filter: drop-shadow(0 0 28px rgba(168, 85, 247, .7));
+            }
+        }
+
+        .subtitle {
+            font-size: 11px;
+            letter-spacing: .3em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* ============================================
+     TWO-COLUMN BODY
+  ============================================ */
+        .body-row {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        /* LEFT PANEL */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+
+            flex: 0 0 480px;
+            /* tăng từ 280px lên 340px */
+            min-width: 300px;
+            /* tăng nhẹ để không bị bó */
+        }
+
+        /* RIGHT PANEL — board */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ============================================
+     CONTROLS
+  ============================================ */
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            padding: 8px 14px;
+            border: 1px solid var(--glass-border);
+            background: var(--bg-card);
+            color: var(--text-main);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s;
+            text-transform: uppercase;
+            backdrop-filter: blur(12px);
+        }
+
+        .btn:hover {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+            box-shadow: 0 0 12px rgba(0, 212, 255, .3);
+        }
+
+        .btn-icon {
+            font-size: 16px;
+        }
+
+        .diff-wrap {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        .diff-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all .2s;
+            background: var(--bg-card);
+            color: var(--text-dim);
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .diff-btn.selected {
+            background: rgba(168, 85, 247, .2);
+            color: var(--neon-purple);
+        }
+
+        .diff-btn:hover:not(.selected) {
+            background: rgba(255, 255, 255, .04);
+            color: var(--text-main);
+        }
+
+        /* SCORE RULES */
+        .score-rules {
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: .04em;
+            line-height: 1.9;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            backdrop-filter: blur(8px);
+        }
+
+        .score-rules .row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .score-rules .dot-icon {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .win-hint {
+            color: var(--neon-green);
+            font-weight: 700;
+        }
+
+        .lose-hint {
+            color: var(--neon-red);
+            font-weight: 700;
+        }
+
+        .blue-hint {
+            color: var(--neon-blue);
+            font-weight: 700;
+        }
+
+        /* SCOREBOARD */
+        .scoreboard {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .score-card {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            backdrop-filter: blur(16px);
+            transition: border-color .3s, box-shadow .3s;
+        }
+
+        .score-card.active-player {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 16px rgba(0, 212, 255, .2);
+        }
+
+        .score-card .label {
+            font-size: 9px;
+            letter-spacing: .2em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .score-card .symbol {
+            font-size: 22px;
+            margin: 4px 0;
+        }
+
+        .score-card .val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--neon-blue);
+        }
+
+        .score-card.o-card .val {
+            color: var(--neon-purple);
+        }
+
+        .score-card .player-name {
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 2px;
+        }
+
+        .score-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            flex: 0 0 50px;
+        }
+
+        .vs-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        .draw-count {
+            font-size: 9px;
+            color: var(--text-dim);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .draw-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 15px;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* STATUS */
+        .status {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-align: center;
+            min-height: 22px;
+            transition: all .3s;
+            padding: 8px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            backdrop-filter: blur(8px);
+            width: 100%;
+        }
+
+        .status.win {
+            color: var(--neon-green);
+            border-color: rgba(34, 197, 94, .3);
+            text-shadow: 0 0 14px rgba(34, 197, 94, .5);
+            animation: flash .4s ease-in-out 3;
+        }
+
+        .status.lose {
+            color: var(--neon-red);
+            border-color: rgba(255, 77, 109, .3);
+            text-shadow: 0 0 14px rgba(255, 77, 109, .5);
+        }
+
+        .status.draw {
+            color: var(--neon-blue);
+            border-color: rgba(0, 212, 255, .3);
+            text-shadow: 0 0 12px rgba(0, 212, 255, .4);
+        }
+
+        .status.think {
+            color: var(--neon-purple);
+            border-color: rgba(168, 85, 247, .3);
+        }
+
+        @keyframes flash {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        /* AI THINKING */
+        .ai-thinking {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            height: 16px;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .ai-thinking.visible {
+            opacity: 1;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--neon-purple);
+            animation: dotBounce 1s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: .15s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: .3s;
+        }
+
+        @keyframes dotBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+                opacity: .4
+            }
+
+            50% {
+                transform: translateY(-5px);
+                opacity: 1
+            }
+        }
+
+        /* Reset button in left panel */
+        .btn-reset {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 11px;
+            cursor: pointer;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(0, 212, 255, .12), rgba(168, 85, 247, .12));
+            border: 1px solid rgba(0, 212, 255, .35);
+            color: var(--neon-blue);
+            border-radius: 10px;
+            transition: all .25s;
+            box-shadow: 0 0 10px rgba(0, 212, 255, .12);
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, rgba(0, 212, 255, .22), rgba(168, 85, 247, .22));
+            box-shadow: 0 0 20px rgba(0, 212, 255, .3);
+            transform: translateY(-1px);
+        }
+
+        .footer {
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: .1em;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        /* ============================================
+     BOARD — right side, fills available space
+  ============================================ */
+        .board-wrap {
+            width: 100%;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 4px;
+            width: 100%;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: var(--cell-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform .12s, border-color .2s, box-shadow .2s, background .2s;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 5px;
+            background: radial-gradient(circle at center, rgba(0, 212, 255, .08), transparent 70%);
+            opacity: 0;
+            transition: opacity .15s;
+        }
+
+        .cell:not(.taken):hover {
+            transform: scale(1.1);
+            border-color: rgba(0, 212, 255, .5);
+            box-shadow: 0 0 10px rgba(0, 212, 255, .25), inset 0 0 6px rgba(0, 212, 255, .06);
+        }
+
+        .cell:not(.taken):hover::before {
+            opacity: 1;
+        }
+
+        .cell.taken {
+            cursor: default;
+        }
+
+        .cell-symbol {
+            font-size: clamp(9px, 2vw, 20px);
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            line-height: 1;
+            animation: symbolPop .2s cubic-bezier(.34, 1.56, .64, 1) forwards;
+            opacity: 0;
+        }
+
+        .cell-symbol.x-sym {
+            color: var(--neon-blue);
+            text-shadow: 0 0 8px var(--neon-blue);
+        }
+
+        .cell-symbol.o-sym {
+            color: var(--neon-purple);
+            text-shadow: 0 0 8px var(--neon-purple);
+        }
+
+        @keyframes symbolPop {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(-15deg)
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg)
+            }
+        }
+
+        .cell.winner {
+            border-color: var(--neon-green) !important;
+            background: rgba(34, 197, 94, .15) !important;
+            box-shadow: 0 0 12px rgba(34, 197, 94, .5), inset 0 0 8px rgba(34, 197, 94, .1) !important;
+            animation: winPulse .5s ease-in-out infinite alternate;
+        }
+
+        .cell.winner .cell-symbol {
+            color: var(--neon-green) !important;
+            text-shadow: 0 0 12px var(--neon-green) !important;
+        }
+
+        @keyframes winPulse {
+            0% {
+                box-shadow: 0 0 8px rgba(34, 197, 94, .3)
+            }
+
+            100% {
+                box-shadow: 0 0 20px rgba(34, 197, 94, .7)
+            }
+        }
+
+        .board.shake {
+            animation: shake .4s ease-in-out;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+
+            20% {
+                transform: translateX(-6px)
+            }
+
+            40% {
+                transform: translateX(6px)
+            }
+
+            60% {
+                transform: translateX(-4px)
+            }
+
+            80% {
+                transform: translateX(4px)
+            }
+        }
+
+        /* ============================================
+     MODAL
+  ============================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(3, 7, 18, 0.78);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+            animation: overlayFade .2s ease forwards;
+        }
+
+        @keyframes overlayFade {
+            0% {
+                opacity: 0
+            }
+
+            100% {
+                opacity: 1
+            }
+        }
+
+        .question-box {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(8, 15, 35, 0.97);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 22px;
+            padding: 34px 26px;
+            backdrop-filter: blur(24px);
+            box-shadow: 0 0 60px rgba(0, 212, 255, .14), 0 0 120px rgba(168, 85, 247, .09), 0 24px 64px rgba(0, 0, 0, .6);
+            animation: modalPop .35s cubic-bezier(.34, 1.56, .64, 1) forwards;
+        }
+
+        @keyframes modalPop {
+            0% {
+                opacity: 0;
+                transform: scale(.86) translateY(24px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .q-header {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: var(--neon-purple);
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .q-header::before,
+        .q-header::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(168, 85, 247, .25);
+        }
+
+        .q-context {
+            font-size: 11px;
+            text-align: center;
+            margin-bottom: 16px;
+            color: var(--text-dim);
+            letter-spacing: .05em;
+        }
+
+        .q-context .hi {
+            font-weight: 700;
+        }
+
+        .q-context .c-win {
+            color: var(--neon-green);
+        }
+
+        .q-context .c-lose {
+            color: var(--neon-red);
+        }
+
+        .q-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(22px, 5vw, 30px);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 24px;
+            color: var(--text-main);
+            text-shadow: 0 0 20px rgba(0, 212, 255, .2);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            /* Sửa từ 1fr 1fr 1fr thành 1fr để xếp dọc */
+            gap: 12px;
+            width: 100%;
+            /* Đảm bảo các nút chiếm hết chiều ngang */
+        }
+
+        .opt-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 18px 8px;
+            background: rgba(15, 23, 42, .8);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all .2s;
+            text-align: center;
+            padding: 14px 20px;
+            /* Chỉnh lại padding cho cân đối khi xếp dọc */
+            text-align: left;
+            /* (Tùy chọn) Căn lề trái nếu bạn muốn nhìn chuyên nghiệp hơn */
+            font-size: 16px;
+        }
+
+        .opt-btn:hover {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+            box-shadow: 0 0 16px rgba(0, 212, 255, .3);
+            transform: translateY(-3px) scale(1.04);
+        }
+
+        .opt-btn.correct-anim {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            background: rgba(34, 197, 94, .12);
+            box-shadow: 0 0 22px rgba(34, 197, 94, .45);
+        }
+
+        .opt-btn.wrong-anim {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+            background: rgba(255, 77, 109, .12);
+        }
+
+        /* ============================================
+     RESPONSIVE — stack on mobile
+  ============================================ */
+        @media (max-width: 700px) {
+            .body-row {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                flex: none;
+                width: 100%;
+                min-width: unset;
+            }
+
+            .board {
+                gap: 3px;
+            }
+
+            .cell-symbol {
+                font-size: clamp(8px, 3.5vw, 18px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-canvas"></div>
+    <div class="bg-grid"></div>
+    <div id="particles"></div>
+
+    <div class="page">
+
+        <!-- HEADER — full width -->
+        <header>
+            <div class="title">Neon Arena</div>
+            <div class="subtitle">Cờ Caro 9×9 — 5 ô liên tiếp để thắng</div>
+        </header>
+
+        <!-- TWO-COLUMN BODY -->
+        <div class="body-row">
+
+            <!-- ===== LEFT PANEL ===== -->
+            <div class="left-panel">
+
+                <!-- Controls -->
+                <div class="controls">
+                    <div class="diff-wrap">
+                        <button class="diff-btn selected" id="btnEasy" onclick="setDiff('easy')">Easy</button>
+                        <button class="diff-btn" id="btnHard" onclick="setDiff('hard')">Hard</button>
+                    </div>
+                    <button class="btn btn-icon" id="btnSound" onclick="toggleSound()" title="Âm thanh">🔊</button>
+                    <button class="btn" onclick="resetAll()">Reset</button>
+                </div>
+
+                <!-- Score rules -->
+                <div class="score-rules">
+                    <div class="row"><span class="dot-icon" style="background:var(--neon-green)"></span><span><span
+                                class="win-hint">Bạn thắng:</span> +2 điểm ngay</span></div>
+                    <div class="row"><span class="dot-icon" style="background:var(--neon-blue)"></span><span><span
+                                class="blue-hint">Hòa đúng:</span> +1 bạn &nbsp;/&nbsp; <span class="lose-hint">Hòa
+                                sai:</span> +1 máy</span></div>
+                    <div class="row"><span class="dot-icon" style="background:var(--neon-red)"></span><span><span
+                                class="blue-hint">Thua đúng:</span> +1 bạn &nbsp;/&nbsp; <span class="lose-hint">Thua
+                                sai:</span> +2 máy</span></div>
+                </div>
+
+                <!-- Scoreboard -->
+                <div class="scoreboard">
+                    <div class="score-card" id="cardX">
+                        <div class="label">Người chơi</div>
+                        <div class="symbol">❌</div>
+                        <div class="val" id="scoreX">0</div>
+                        <div class="player-name">X — Bạn</div>
+                    </div>
+                    <div class="score-center">
+                        <div class="vs-text">VS</div>
+                        <div class="draw-count">
+                            <div class="draw-val" id="scoreDraw">0</div>
+                            <div>Ván</div>
+                        </div>
+                    </div>
+                    <div class="score-card o-card" id="cardO">
+                        <div class="label">Máy tính</div>
+                        <div class="symbol">⭕</div>
+                        <div class="val" id="scoreO">0</div>
+                        <div class="player-name">O — AI</div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="status" id="status">Bạn đi trước — Đặt ❌</div>
+                <div class="ai-thinking" id="aiThinking">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <span style="font-size:10px;color:var(--text-dim);letter-spacing:.1em;margin-left:4px">AI ĐANG SUY
+                        NGHĨ</span>
+                </div>
+
+                <!-- Replay button -->
+                <button class="btn-reset" onclick="resetGame()">⟳ Chơi Lại</button>
+
+                <div class="footer">NEON ARENA © 2025 — Made with ❤</div>
+            </div>
+            <!-- end left panel -->
+
+            <!-- ===== RIGHT PANEL — BOARD ===== -->
+            <div class="right-panel">
+                <div class="board-wrap">
+                    <div class="board" id="board"></div>
+                </div>
+            </div>
+            <!-- end right panel -->
+
+        </div>
+        <!-- end body-row -->
+
+    </div>
+    <!-- end page -->
+
+    <!-- QUESTION MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="question-box">
+            <div class="q-header">Câu Hỏi Thưởng</div>
+            <div class="q-context" id="qContext"></div>
+            <div class="q-text" id="qText"></div>
+            <div class="options" id="options"></div>
+        </div>
+    </div>
+
+    <script>
+        /* AUDIO */
+        let soundOn = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext; let ctx;
+        function getCtx() { if (!ctx) ctx = new AudioCtx(); return ctx; }
+        function playTone(freq, type, duration, vol = .18, delay = 0) {
+            if (!soundOn) return;
+            try {
+                const a = getCtx(), osc = a.createOscillator(), g = a.createGain();
+                osc.connect(g); g.connect(a.destination); osc.frequency.value = freq; osc.type = type;
+                g.gain.setValueAtTime(vol, a.currentTime + delay);
+                g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + delay + duration);
+                osc.start(a.currentTime + delay); osc.stop(a.currentTime + delay + duration);
+            } catch (e) { }
+        }
+        function sfxClick() { playTone(440, 'sine', .08, .12); }
+        function sfxOPlace() { playTone(280, 'sine', .10, .10); }
+        function sfxWin() { playTone(523, 'sine', .15, .18, 0); playTone(659, 'sine', .15, .18, .12); playTone(784, 'sine', .25, .2, .24); playTone(1047, 'sine', .35, .2, .38); }
+        function sfxLose() { playTone(330, 'sawtooth', .15, .15, 0); playTone(220, 'sawtooth', .3, .15, .15); }
+        function sfxDraw() { playTone(400, 'triangle', .3, .12); }
+        function sfxCorrect() { playTone(880, 'sine', .2, .15); }
+        function sfxWrong() { playTone(200, 'sawtooth', .2, .15); }
+        function toggleSound() { soundOn = !soundOn; document.getElementById('btnSound').textContent = soundOn ? '🔊' : '🔇'; }
+
+        /* PARTICLES */
+        function spawnParticles(x, y, color) {
+            const c = document.getElementById('particles');
+            for (let i = 0; i < 22; i++) {
+                const p = document.createElement('div'); p.className = 'particle';
+                const size = 4 + Math.random() * 8, angle = (Math.PI * 2 * i) / 22 + Math.random() * .5, dist = 60 + Math.random() * 120;
+                p.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${color};box-shadow:0 0 ${size * 2}px ${color};--dx:${Math.cos(angle) * dist}px;--dy:${Math.sin(angle) * dist}px;animation-duration:${.8 + Math.random() * .6}s;`;
+                c.appendChild(p); setTimeout(() => p.remove(), 1500);
+            }
+        }
+        function getBoardCenter() { const r = document.getElementById('board').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+
+        /* GAME STATE */
+        const SIZE = 9, WIN_LEN = 5;
+        let board = Array(SIZE * SIZE).fill('');
+        let scores = { X: 0, O: 0, draw: 0 };
+        let gameOver = false, difficulty = 'easy';
+
+        const questions = [
+            { q: "5 + 3 = ?", options: ["6", "7", "8"], correct: 2 },
+            { q: "10 − 4 = ?", options: ["5", "6", "7"], correct: 1 },
+            { q: "3 × 4 = ?", options: ["7", "10", "12"], correct: 2 },
+            { q: "12 ÷ 3 = ?", options: ["2", "3", "4"], correct: 2 },
+            { q: "7 + 8 = ?", options: ["13", "14", "15"], correct: 2 },
+            { q: "9 × 3 = ?", options: ["24", "27", "30"], correct: 1 },
+            { q: "20 − 7 = ?", options: ["11", "12", "13"], correct: 2 },
+            { q: "16 ÷ 4 = ?", options: ["3", "4", "5"], correct: 1 },
+        ];
+
+        /* WIN DETECTION */
+        const DIRS = [[1, 0], [0, 1], [1, 1], [1, -1]];
+        function getWinnerCells(p) {
+            for (let r = 0; r < SIZE; r++)for (let c = 0; c < SIZE; c++)for (const [dr, dc] of DIRS) {
+                let cells = [];
+                for (let k = 0; k < WIN_LEN; k++) {
+                    const nr = r + dr * k, nc = c + dc * k;
+                    if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) break;
+                    if (board[nr * SIZE + nc] === p) cells.push(nr * SIZE + nc); else break;
+                }
+                if (cells.length === WIN_LEN) return cells;
+            }
+            return null;
+        }
+        function checkWinFor(p) { return !!getWinnerCells(p); }
+        function isDraw() { return !board.includes('') && !checkWinFor('X') && !checkWinFor('O'); }
+        function getEmptyCells() { return board.map((v, i) => v === '' ? i : null).filter(v => v !== null); }
+
+        /* DIFFICULTY */
+        function setDiff(d) {
+            difficulty = d;
+            document.getElementById('btnEasy').classList.toggle('selected', d === 'easy');
+            document.getElementById('btnHard').classList.toggle('selected', d === 'hard');
+            resetGame();
+        }
+
+        /* RENDER */
+        function renderBoard(winCells = []) {
+            const el = document.getElementById('board');
+            el.style.gridTemplateColumns = `repeat(${SIZE},1fr)`;
+            el.innerHTML = '';
+            board.forEach((val, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell' + (val ? ' taken' : '') + (winCells.includes(i) ? ' winner' : '');
+                if (val) { const sym = document.createElement('span'); sym.className = 'cell-symbol ' + (val === 'X' ? 'x-sym' : 'o-sym'); sym.textContent = val; cell.appendChild(sym); }
+                cell.addEventListener('click', () => playerMove(i));
+                el.appendChild(cell);
+            });
+        }
+        function updateScoreboard() {
+            document.getElementById('scoreX').textContent = scores.X;
+            document.getElementById('scoreO').textContent = scores.O;
+            document.getElementById('scoreDraw').textContent = scores.draw;
+        }
+        function setStatus(msg, cls = '') { const el = document.getElementById('status'); el.textContent = msg; el.className = 'status ' + cls; }
+        function showAiThinking(v) { document.getElementById('aiThinking').classList.toggle('visible', v); }
+
+        /* PLAYER MOVE */
+        function playerMove(i) {
+            if (board[i] || gameOver) return;
+            sfxClick(); board[i] = 'X'; renderBoard(); highlightActive('X');
+            const win = getWinnerCells('X');
+            if (win) {
+                renderBoard(win); scores.X += 2; updateScoreboard(); scores.draw++;
+                setStatus('🎉 Bạn thắng! +2 điểm', 'win'); sfxWin();
+                const c = getBoardCenter(); spawnParticles(c.x, c.y, '#22c55e');
+                gameOver = true; setTimeout(() => resetGame(true), 2200); return;
+            }
+            if (isDraw()) {
+                setStatus('🤝 Hòa rồi! Trả lời câu hỏi...', 'draw'); sfxDraw();
+                scores.draw++; updateScoreboard(); gameOver = true;
+                setTimeout(() => showQuestion('draw'), 600); return;
+            }
+            gameOver = true; setStatus('AI đang suy nghĩ...', 'think'); showAiThinking(true);
+            setTimeout(aiMove, difficulty === 'hard' ? 700 : 400);
+        }
+
+        /* AI MOVE */
+        function aiMove() {
+            showAiThinking(false);
+            const move = difficulty === 'hard' ? getHardMove() : getEasyMove();
+            board[move] = 'O'; sfxOPlace(); renderBoard(); highlightActive('X'); gameOver = false;
+            const win = getWinnerCells('O');
+            if (win) {
+                renderBoard(win); scores.draw++;
+                setStatus('😢 Bạn thua! Trả lời câu hỏi...', 'lose'); sfxLose();
+                document.getElementById('board').classList.add('shake');
+                setTimeout(() => document.getElementById('board').classList.remove('shake'), 500);
+                gameOver = true; setTimeout(() => showQuestion('lose'), 600); return;
+            }
+            if (isDraw()) {
+                setStatus('🤝 Hòa rồi! Trả lời câu hỏi...', 'draw'); sfxDraw();
+                scores.draw++; updateScoreboard(); gameOver = true;
+                setTimeout(() => showQuestion('draw'), 600); return;
+            }
+            setStatus('Lượt của bạn — Đặt ❌'); highlightActive('X');
+        }
+
+        /* ================================================================
+           AI LOGIC — Advanced Engine
+           Minimax + Alpha-Beta + PVS + TT + Zobrist + Killers + LMR + QSearch
+           ================================================================ */
+
+        // ── Zobrist Hashing ──────────────────────────────────────────────
+        const ZobristTable = (() => {
+            const t = [];
+            // Use a simple LCG to get deterministic pseudo-random 32-bit numbers
+            let seed = 0xDEADBEEF;
+            function rand32() {
+                seed ^= seed << 13; seed ^= seed >> 17; seed ^= seed << 5;
+                return (seed >>> 0);
+            }
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                t[i] = { X: rand32(), O: rand32() };
+            }
+            return t;
+        })();
+
+        // We store hash as two 32-bit halves to avoid float precision issues
+        let zobristHi = 0, zobristLo = 0;
+
+        function zobristInit() {
+            zobristHi = 0; zobristLo = 0;
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                if (board[i] === 'O') { zobristHi ^= ZobristTable[i].O; }
+                else if (board[i] === 'X') { zobristHi ^= ZobristTable[i].X; }
+            }
+            zobristLo = zobristHi ^ 0x12345678; // second half derived
+        }
+
+        function zobristToggle(i, p) {
+            const v = p === 'O' ? ZobristTable[i].O : ZobristTable[i].X;
+            zobristHi ^= v;
+            zobristLo ^= (v * 1000003) >>> 0;
+        }
+
+        function zobristKey() { return zobristHi + '_' + zobristLo; }
+
+        // ── Transposition Table ─────────────────────────────────────────
+        const TT_SIZE = 1 << 18; // ~262k slots
+        const ttTable = new Array(TT_SIZE);
+        const TT_EXACT = 0, TT_LOWER = 1, TT_UPPER = 2;
+
+        function ttIndex() { return zobristHi & (TT_SIZE - 1); }
+
+        function ttStore(depth, score, flag, move) {
+            const idx = ttIndex();
+            const key = zobristKey();
+            // Replace-if-deeper strategy
+            if (!ttTable[idx] || ttTable[idx].depth <= depth) {
+                ttTable[idx] = { key, depth, score, flag, move };
+            }
+        }
+
+        function ttLookup(depth, alpha, beta) {
+            const idx = ttIndex();
+            const e = ttTable[idx];
+            if (!e || e.key !== zobristKey() || e.depth < depth) return null;
+            if (e.flag === TT_EXACT) return { score: e.score, move: e.move };
+            if (e.flag === TT_LOWER && e.score >= beta) return { score: e.score, move: e.move };
+            if (e.flag === TT_UPPER && e.score <= alpha) return { score: e.score, move: e.move };
+            return null;
+        }
+
+        // ── Killer Moves (per depth) ────────────────────────────────────
+        const MAX_DEPTH = 8;
+        const killers = Array.from({ length: MAX_DEPTH + 1 }, () => []);
+
+        function storeKiller(depth, move) {
+            const k = killers[depth];
+            if (k[0] !== move) { k[1] = k[0]; k[0] = move; }
+        }
+
+        // ── Pattern Scores ───────────────────────────────────────────────
+        // Returns score for a run of `cnt` pieces with `open` open ends
+        function patternScore(cnt, open) {
+            if (cnt >= 5) return 20000000;
+            if (cnt === 4) return open === 2 ? 500000 : open === 1 ? 100000 : 0;
+            if (cnt === 3) return open === 2 ? 50000 : open === 1 ? 2000 : 0;
+            if (cnt === 2) return open === 2 ? 800 : open === 1 ? 150 : 0;
+            if (cnt === 1) return open === 2 ? 50 : open === 1 ? 10 : 0;
+            return 0;
+        }
+
+        // Scan a line of cells in direction; return { cnt, open } starting at (r,c)
+        function scanLine(r, c, dr, dc, p) {
+            let cnt = 0;
+            for (let k = 0; k < WIN_LEN; k++) {
+                const nr = r + dr * k, nc = c + dc * k;
+                if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) break;
+                if (board[nr * SIZE + nc] === p) cnt++;
+                else break;
+            }
+            if (cnt === 0) return { cnt: 0, open: 0 };
+            let open = 0;
+            const br = r - dr, bc = c - dc;
+            if (br >= 0 && br < SIZE && bc >= 0 && bc < SIZE && board[br * SIZE + bc] === '') open++;
+            const ar = r + dr * cnt, ac = c + dc * cnt;
+            if (ar >= 0 && ar < SIZE && ac >= 0 && ac < SIZE && board[ar * SIZE + ac] === '') open++;
+            return { cnt, open };
+        }
+
+        // ── Advanced Evaluation ──────────────────────────────────────────
+        function evaluateAdvanced() {
+            let score = 0;
+
+            // Direction-based pattern scoring
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    for (const [dr, dc] of DIRS) {
+                        const oLine = scanLine(r, c, dr, dc, 'O');
+                        const xLine = scanLine(r, c, dr, dc, 'X');
+                        score += patternScore(oLine.cnt, oLine.open);
+                        score -= patternScore(xLine.cnt, xLine.open);
+                    }
+                }
+            }
+
+            // Double-threat bonus: if placing O creates 2+ threats of 4+, massive bonus
+            // (detected implicitly by high pattern scores above)
+
+            // Center bonus
+            const center = Math.floor(SIZE / 2);
+            for (let i = 0; i < SIZE * SIZE; i++) {
+                if (board[i] === '') continue;
+                const r = Math.floor(i / SIZE), c = i % SIZE;
+                const dist = Math.max(Math.abs(r - center), Math.abs(c - center));
+                const bonus = Math.max(0, 4 - dist) * 15;
+                score += board[i] === 'O' ? bonus : -bonus;
+            }
+
+            return score;
+        }
+
+        // ── Threat detection ─────────────────────────────────────────────
+        // Count how many "threats" (open-3 or better) a player has after placing at i
+        function countThreats(i, p) {
+            board[i] = p;
+            let threats = 0;
+            const r = Math.floor(i / SIZE), c = i % SIZE;
+            for (const [dr, dc] of DIRS) {
+                // scan backwards to find start of line
+                for (let back = 0; back < WIN_LEN; back++) {
+                    const sr = r - dr * back, sc = c - dc * back;
+                    if (sr < 0 || sr >= SIZE || sc < 0 || sc >= SIZE) continue;
+                    const { cnt, open } = scanLine(sr, sc, dr, dc, p);
+                    if (cnt >= 4) { threats += 10; break; }
+                    if (cnt === 3 && open === 2) { threats += 1; break; }
+                }
+            }
+            board[i] = '';
+            return threats;
+        }
+
+        // ── Candidate generation ─────────────────────────────────────────
+        function getCandidates(radius) {
+            radius = radius || 2;
+            const set = new Set();
+            board.forEach((v, i) => {
+                if (v === '') return;
+                const r = Math.floor(i / SIZE), c = i % SIZE;
+                for (let dr = -radius; dr <= radius; dr++) {
+                    for (let dc = -radius; dc <= radius; dc++) {
+                        const nr = r + dr, nc = c + dc;
+                        if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && board[nr * SIZE + nc] === '')
+                            set.add(nr * SIZE + nc);
+                    }
+                }
+            });
+            if (set.size === 0) set.add(Math.floor(SIZE * SIZE / 2));
+            return [...set];
+        }
+
+        // ── Move Ordering ────────────────────────────────────────────────
+        // Score a move for ordering (higher = try first)
+        function moveOrderScore(i, maximizing, depth) {
+            const p = maximizing ? 'O' : 'X';
+            const opp = maximizing ? 'X' : 'O';
+
+            // Killer moves get high priority
+            if (killers[depth] && (killers[depth][0] === i || killers[depth][1] === i)) return 9000000;
+
+            // Quick tactical score
+            board[i] = p;
+            let s = 0;
+            // Immediate win
+            if (checkWinFor(p)) { board[i] = ''; return 99000000; }
+            // Evaluate pattern gains
+            const r = Math.floor(i / SIZE), c = i % SIZE;
+            for (const [dr, dc] of DIRS) {
+                for (let back = 0; back < WIN_LEN; back++) {
+                    const sr = r - dr * back, sc = c - dc * back;
+                    if (sr < 0 || sr >= SIZE || sc < 0 || sc >= SIZE) continue;
+                    const ln = scanLine(sr, sc, dr, dc, p);
+                    s += patternScore(ln.cnt, ln.open);
+                    break;
+                }
+            }
+            board[i] = opp;
+            // Check blocking opponent threats
+            if (checkWinFor(opp)) { board[i] = ''; return 88000000; }
+            for (const [dr, dc] of DIRS) {
+                for (let back = 0; back < WIN_LEN; back++) {
+                    const sr = r - dr * back, sc = c - dc * back;
+                    if (sr < 0 || sr >= SIZE || sc < 0 || sc >= SIZE) continue;
+                    const ln = scanLine(sr, sc, dr, dc, opp);
+                    s += patternScore(ln.cnt, ln.open) * 0.9;
+                    break;
+                }
+            }
+            board[i] = '';
+
+            // Center bonus for ordering
+            const dist = Math.max(Math.abs(r - 4), Math.abs(c - 4));
+            s += Math.max(0, 4 - dist) * 50;
+            return s;
+        }
+
+        function generateOrderedMoves(cands, maximizing, depth) {
+            return cands
+                .map(i => ({ i, s: moveOrderScore(i, maximizing, depth) }))
+                .sort((a, b) => b.s - a.s)
+                .map(x => x.i);
+        }
+
+        // ── Quiescence Search ────────────────────────────────────────────
+        // Only search "loud" moves (threats of 4 or forced blocks) to avoid horizon effect
+        function quiescence(alpha, beta, maximizing, qdepth) {
+            const standPat = evaluateAdvanced();
+            if (qdepth <= 0) return standPat;
+            if (checkWinFor('O')) return 20000000;
+            if (checkWinFor('X')) return -20000000;
+
+            if (maximizing) {
+                if (standPat >= beta) return beta;
+                if (standPat > alpha) alpha = standPat;
+                // Only consider forcing moves
+                const cands = getCandidates(1);
+                for (const i of cands) {
+                    const threats = countThreats(i, 'O');
+                    if (threats < 1) continue;
+                    board[i] = 'O'; zobristToggle(i, 'O');
+                    const val = quiescence(alpha, beta, false, qdepth - 1);
+                    board[i] = ''; zobristToggle(i, 'O');
+                    if (val > alpha) alpha = val;
+                    if (alpha >= beta) break;
+                }
+                return alpha;
+            } else {
+                if (standPat <= alpha) return alpha;
+                if (standPat < beta) beta = standPat;
+                const cands = getCandidates(1);
+                for (const i of cands) {
+                    const threats = countThreats(i, 'X');
+                    if (threats < 1) continue;
+                    board[i] = 'X'; zobristToggle(i, 'X');
+                    const val = quiescence(alpha, beta, true, qdepth - 1);
+                    board[i] = ''; zobristToggle(i, 'X');
+                    if (val < beta) beta = val;
+                    if (alpha >= beta) break;
+                }
+                return beta;
+            }
+        }
+
+        // ── Principal Variation Search (PVS) with Alpha-Beta, TT, Killers, LMR ──
+        function pvSearch(depth, alpha, beta, maximizing, ply) {
+            // Terminal
+            if (checkWinFor('O')) return 20000000 + depth;
+            if (checkWinFor('X')) return -20000000 - depth;
+            if (!board.includes('')) return 0;
+
+            // Quiescence at leaf
+            if (depth <= 0) return quiescence(alpha, beta, maximizing, 2);
+
+            // Transposition table lookup
+            const ttHit = ttLookup(depth, alpha, beta);
+            if (ttHit) return ttHit.score;
+
+            const cands = getCandidates();
+            const moves = generateOrderedMoves(cands, maximizing, ply);
+
+            let best = maximizing ? -Infinity : Infinity;
+            let bestMove = moves[0];
+            let flag = TT_UPPER;
+            let moveIdx = 0;
+
+            for (const i of moves) {
+                const p = maximizing ? 'O' : 'X';
+                board[i] = p; zobristToggle(i, p);
+
+                let val;
+                if (moveIdx === 0) {
+                    // Full window for first (best) move
+                    val = pvSearch(depth - 1, alpha, beta, !maximizing, ply + 1);
+                } else {
+                    // Late Move Reduction: reduce depth for late quiet moves
+                    let reduction = 0;
+                    if (depth >= 3 && moveIdx >= 4) {
+                        // Check if move is "quiet" (no immediate threats)
+                        const thr = countThreats(i, p);
+                        if (thr === 0) reduction = 1;
+                    }
+
+                    // Null window search first (PVS)
+                    val = pvSearch(depth - 1 - reduction, maximizing ? alpha : beta - 1,
+                        maximizing ? alpha + 1 : beta, !maximizing, ply + 1);
+
+                    // Re-search if null window failed and reduction was applied
+                    if (reduction > 0 && ((maximizing && val > alpha) || (!maximizing && val < beta))) {
+                        val = pvSearch(depth - 1, maximizing ? alpha : beta - 1,
+                            maximizing ? alpha + 1 : beta, !maximizing, ply + 1);
+                    }
+
+                    // Re-search with full window if PVS failed high
+                    if (maximizing && val > alpha && val < beta) {
+                        val = pvSearch(depth - 1, alpha, beta, false, ply + 1);
+                    } else if (!maximizing && val > alpha && val < beta) {
+                        val = pvSearch(depth - 1, alpha, beta, true, ply + 1);
+                    }
+                }
+
+                board[i] = ''; zobristToggle(i, p);
+
+                if (maximizing) {
+                    if (val > best) { best = val; bestMove = i; }
+                    if (val > alpha) { alpha = val; flag = TT_EXACT; }
+                    if (alpha >= beta) {
+                        storeKiller(ply, i);
+                        ttStore(depth, best, TT_LOWER, bestMove);
+                        return alpha;
+                    }
+                } else {
+                    if (val < best) { best = val; bestMove = i; }
+                    if (val < beta) { beta = val; flag = TT_EXACT; }
+                    if (alpha >= beta) {
+                        storeKiller(ply, i);
+                        ttStore(depth, best, TT_UPPER, bestMove);
+                        return beta;
+                    }
+                }
+
+                if (Math.abs(best) >= 20000000) break; // Forced win/loss found
+                moveIdx++;
+            }
+
+            ttStore(depth, best, flag, bestMove);
+            return best;
+        }
+
+        // ── Iterative Deepening ──────────────────────────────────────────
+        function iterativeDeepening(maxDepth, timeLimitMs) {
+            const cands = getCandidates();
+            const moves = generateOrderedMoves(cands, true, 0);
+
+            let bestMove = moves[0];
+            let bestScore = -Infinity;
+            const startTime = Date.now();
+
+            for (let depth = 1; depth <= maxDepth; depth++) {
+                let depthBest = -Infinity;
+                let depthMove = moves[0];
+
+                for (const i of moves) {
+                    board[i] = 'O'; zobristToggle(i, 'O');
+                    const score = pvSearch(depth - 1, -Infinity, Infinity, false, 1);
+                    board[i] = ''; zobristToggle(i, 'O');
+
+                    if (score > depthBest) {
+                        depthBest = score;
+                        depthMove = i;
+                    }
+
+                    if (depthBest >= 20000000) break; // Forced win
+                }
+
+                bestScore = depthBest;
+                bestMove = depthMove;
+
+                // Time check: abort deeper search if running out of time
+                if (Date.now() - startTime > timeLimitMs * 0.7) break;
+                if (Math.abs(bestScore) >= 20000000) break; // Win/lose found
+            }
+
+            return bestMove;
+        }
+
+        // ── Easy Move (unchanged) ────────────────────────────────────────
+        function getEasyMove() {
+            const cands = getCandidates();
+            for (const i of cands) { board[i] = 'O'; if (checkWinFor('O')) { board[i] = ''; return i; } board[i] = ''; }
+            for (const i of cands) { board[i] = 'X'; if (checkWinFor('X')) { board[i] = ''; return i; } board[i] = ''; }
+            return cands[Math.floor(Math.random() * cands.length)];
+        }
+
+        // ── Hard Move — Full Engine ───────────────────────────────────────
+        function getHardMove() {
+            const cands = getCandidates();
+
+            // Layer 1: Immediate win
+            for (const i of cands) {
+                board[i] = 'O';
+                if (checkWinFor('O')) { board[i] = ''; return i; }
+                board[i] = '';
+            }
+
+            // Layer 2: Must block immediate win
+            for (const i of cands) {
+                board[i] = 'X';
+                if (checkWinFor('X')) { board[i] = ''; return i; }
+                board[i] = '';
+            }
+
+            // Layer 3: Block double-threat (open-4) — critical!
+            let xThreats = [], oDoubleThreat = [];
+            for (const i of cands) {
+                const xt = countThreats(i, 'X');
+                const ot = countThreats(i, 'O');
+                if (xt >= 10) xThreats.push({ i, t: xt }); // open-4 threat
+                if (ot >= 20) oDoubleThreat.push({ i, t: ot }); // O creates double-4
+            }
+            if (oDoubleThreat.length > 0) {
+                oDoubleThreat.sort((a, b) => b.t - a.t);
+                return oDoubleThreat[0].i;
+            }
+            if (xThreats.length > 0) {
+                xThreats.sort((a, b) => b.t - a.t);
+                return xThreats[0].i;
+            }
+
+            // Layer 4: Full Minimax engine with all optimizations
+            // Initialize Zobrist hash from current board state
+            zobristInit();
+
+            // Clear killer moves for this search
+            for (let d = 0; d <= MAX_DEPTH; d++) killers[d] = [];
+
+            // Determine depth based on candidate count
+            const n = cands.length;
+            const maxDepth = n <= 6 ? 7 : n <= 8 ? 6 : n <= 12 ? 5 : 4;
+
+            // Time budget: 1200ms max
+            const bestMove = iterativeDeepening(maxDepth, 1200);
+            return bestMove;
+        }
+
+        /* QUESTION MODAL */
+        let currentQ = null, questionContext = 'draw';
+        /* Cập nhật hàm showQuestion trong file HTML */
+        async function showQuestion(context) {
+            questionContext = context;
+
+            // Hiển thị trạng thái đang tải
+            document.getElementById('qText').textContent = "Đang tải câu hỏi...";
+            document.getElementById('options').innerHTML = "";
+            document.getElementById('modalOverlay').classList.add('visible');
+
+            try {
+                // Gọi API từ Database của bạn
+                const response = await fetch("http://localhost:5107/api/quizzes/random");
+                const data = await response.json();
+
+                // data lúc này sẽ có cấu trúc như trong Postman của bạn:
+                // { id: 72, question: "...", options: [{ optionText: "...", isCorrect: true }, ...] }
+
+                document.getElementById('qText').textContent = data.question;
+
+                const ctxEl = document.getElementById('qContext');
+                if (context === 'draw') {
+                    ctxEl.innerHTML = 'Trả lời <span class="hi c-win">đúng</span> → +1 bạn &nbsp;|&nbsp; Trả lời <span class="hi c-lose">sai</span> → +1 máy';
+                } else {
+                    ctxEl.innerHTML = 'Trả lời <span class="hi c-win">đúng</span> → +1 bạn &nbsp;|&nbsp; Trả lời <span class="hi c-lose">sai</span> → +2 máy';
+                }
+
+                const opts = document.getElementById('options');
+                opts.innerHTML = '';
+
+                data.options.forEach((opt) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'opt-btn';
+                    btn.textContent = opt.optionText;
+                    // Truyền giá trị isCorrect trực tiếp vào hàm checkAnswer
+                    btn.onclick = () => checkAnswer(btn, opt.isCorrect, data.options);
+                    opts.appendChild(btn);
+                });
+
+            } catch (error) {
+                console.error("Lỗi kết nối API:", error);
+                document.getElementById('qText').textContent = "Không thể tải câu hỏi từ Database!";
+            }
+        }
+        /* Cập nhật hàm checkAnswer */
+        function checkAnswer(btn, isCorrect, allOptions) {
+            // Vô hiệu hóa các nút sau khi đã chọn
+            document.querySelectorAll('.opt-btn').forEach(b => b.onclick = null);
+
+            if (isCorrect) {
+                btn.classList.add('correct-anim');
+                sfxCorrect();
+                scores.X += 1;
+                updateScoreboard();
+                setStatus('✅ Đúng! +1 điểm cho bạn', 'win');
+                const c = getBoardCenter();
+                spawnParticles(c.x, c.y, '#a855f7');
+            } else {
+                btn.classList.add('wrong-anim');
+                sfxWrong();
+
+                // Hiển thị đáp án đúng để người chơi biết
+                const buttons = document.querySelectorAll('.opt-btn');
+                allOptions.forEach((opt, index) => {
+                    if (opt.isCorrect) buttons[index].classList.add('correct-anim');
+                });
+
+                if (questionContext === 'draw') {
+                    scores.O += 1;
+                    setStatus('❌ Sai! +1 điểm cho máy', 'lose');
+                } else {
+                    scores.O += 2;
+                    setStatus('❌ Sai! +2 điểm cho máy', 'lose');
+                }
+                updateScoreboard();
+            }
+
+            setTimeout(() => {
+                document.getElementById('modalOverlay').classList.remove('visible');
+                resetGame(false);
+            }, 2000); // Tăng thời gian lên 2s để người chơi kịp nhìn thấy đáp án đúng
+        }
+
+        /* HELPERS */
+        function highlightActive(player) {
+            document.getElementById('cardX').classList.toggle('active-player', player === 'X');
+            document.getElementById('cardO').classList.toggle('active-player', player === 'O');
+        }
+        function resetGame(keepStatus = false) {
+            board = Array(SIZE * SIZE).fill(''); gameOver = false; renderBoard(); showAiThinking(false);
+            if (!keepStatus) setStatus('Bạn đi trước — Đặt ❌');
+            highlightActive('X');
+            document.getElementById('modalOverlay').classList.remove('visible');
+        }
+        function resetAll() { scores = { X: 0, O: 0, draw: 0 }; updateScoreboard(); resetGame(); }
+
+        renderBoard(); updateScoreboard(); highlightActive('X');
+    </script>
+</body>
+
+</html>

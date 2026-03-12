@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>ALGO Admin System</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="logo"><i class="fas fa-brain"></i> <span>ALGO ADMIN</span></div>
+
+        <nav>
+
+            <!-- <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fas fa-chart-line"></i> Thống kê
+
+            </div>
+
+            <div class="nav-label">Hệ thống</div>
+
+            <div class="nav-item" onclick="switchTab('users')"><i class="fas fa-user-shield"></i> Người dùng</div>
+
+            <div class="nav-label">Nội dung đào tạo</div>
+
+            <div class="nav-item" onclick="switchTab('theory')"><i class="fas fa-book"></i> Lý thuyết</div> -->
+
+            <div class="nav-item" onclick="switchTab('exercises')"><i class="fas fa-list-check"></i> Bài tập trắc nghiệm
+
+            </div>
+
+            <div class="nav-item" onclick="switchTab('graphs')"><i class="fas fa-project-diagram"></i> Kho đồ thị</div>
+
+        </nav>
+
+    </aside>
+
+
+
+    <main class="main-wrapper">
+
+        <section id="tab-dashboard" class="content-tab active">
+
+            <h2 class="page-title">Tổng quan hệ thống</h2>
+
+            <div class="stats-grid" id="stats-container"></div>
+
+        </section>
+
+
+
+        <section id="tab-users" class="content-tab">
+
+            <div class="header-action">
+
+                <h2>Danh sách người dùng</h2>
+
+                <button class="btn btn-primary">+ Thêm thành viên</button>
+
+            </div>
+
+            <div class="data-table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+
+                            <th>Họ tên</th>
+
+                            <th>Email</th>
+
+                            <th>Vai trò</th>
+
+                            <th>Trạng thái</th>
+
+                            <th>Hành động</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="user-list"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+        <section id="tab-theory" class="content-tab">
+
+            <div class="header-action">
+
+                <h2>Quản lý Lý thuyết</h2>
+
+                <button class="btn btn-primary" onclick="createNewTheory()">+ Thêm bài giảng</button>
+
+            </div>
+
+            <div class="content-list" id="theory-list"></div>
+
+        </section>
+
+
+
+        <section id="tab-exercises" class="content-tab">
+
+            <div class="header-action">
+
+                <h2>Quản lý Bài tập Trắc nghiệm</h2>
+
+                <button class="btn btn-primary" onclick="createNewQuiz()">+ Tạo câu hỏi mới</button>
+
+            </div>
+
+            <div class="content-list" id="exercise-list"></div>
+
+        </section>
+
+
+
+        <section id="tab-graphs" class="content-tab">
+
+            <div class="graph-interface">
+
+                <!-- <div class="graph-sidebar">
+
+                    <div class="sidebar-header">
+
+                        <h3>Đồ thị hiện có</h3>
+
+                    </div>
+
+                    <div id="graph-items-list" class="list-container"></div>
+
+                </div> -->
+
+                <div class="graph-main">
+
+                    <div class="canvas-header">
+                        <input type="text" id="g-name" placeholder="Tên đồ thị...">
+
+                        <button class="btn btn-primary" onclick="saveGraph()">Lưu lại</button>
+
+                        <button class="btn btn-reset" onclick="resetGraph()">
+                            <i class="fas fa-sync-alt"></i> Reload đồ thị
+                        </button>
+
+                    </div>
+
+                    <div class="canvas-container">
+
+                        <svg id="graph-svg"></svg>
+
+                    </div>
+
+
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <div id="modal-editor" class="modal">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h3 id="modal-title">Soạn thảo</h3>
+
+                <span class="close" onclick="closeModal()">&times;</span>
+
+            </div>
+
+            <div class="form-body">
+
+                <input type="text" id="content-title" class="form-input" placeholder="Tiêu đề...">
+
+                <div id="quiz-options" style="display:none;">
+
+                    <p style="font-size: 0.8rem; color: #666;">Nhập các lựa chọn:</p>
+
+                    <div class="option-row">
+
+                        <input type="radio" name="ans" value="0"> <input type="text" class="opt-text"
+                            placeholder="Đáp án A">
+
+                    </div>
+
+                    <div class="option-row">
+
+                        <input type="radio" name="ans" value="1"> <input type="text" class="opt-text"
+                            placeholder="Đáp án B">
+
+                    </div>
+
+                    <div class="option-row">
+
+                        <input type="radio" name="ans" value="2"> <input type="text" class="opt-text"
+                            placeholder="Đáp án C">
+
+                    </div>
+
+                </div>
+
+                <div id="editor-container"></div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn" onclick="closeModal()">Hủy</button>
+
+                <button class="btn btn-primary" onclick="saveModalData()">Xác nhận Lưu</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===== EDGE WEIGHT OVERLAY ===== -->
+    <div id="edge-weight-overlay" class="edge-overlay">
+        <div class="edge-modal">
+            <h3>Nhập trọng số cạnh</h3>
+            <input type="number" id="edge-weight-input" min="1" step="1" placeholder="Ví dụ: 5" />
+            <div class="edge-actions">
+                <button class="btn-cancel" onclick="cancelEdgeWeight()">Hủy</button>
+                <button class="btn-confirm" onclick="confirmEdgeWeight()">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-node-overlay" class="overlay">
+        <div class="overlay-box">
+            <h3>⚠️ Xác nhận xóa</h3>
+            <p id="delete-node-text"></p>
+
+            <div class="overlay-actions">
+                <button class="btn-danger" onclick="confirmDeleteNode()">Xóa</button>
+                <button class="btn-cancel" onclick="closeDeleteNodeOverlay()">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+    <script src="logic.js"></script>
+
+</body>
+
+
+
+</html>

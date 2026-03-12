@@ -1,0 +1,376 @@
+{
+    "algorithm": {
+        "name": "Thuật toán Dijkstra",
+        "description": "Tìm đường đi ngắn nhất từ một đỉnh đến các đỉnh khác trong đồ thị có trọng số không âm"
+    },
+    "graph": {
+        "nodes": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f"
+        ],
+        "edges": [
+            {
+                "from": "a",
+                "to": "b",
+                "weight": 42
+            },
+            {
+                "from": "a",
+                "to": "c",
+                "weight": 4
+            },
+            {
+                "from": "a",
+                "to": "d",
+                "weight": 10
+            },
+            {
+                "from": "b",
+                "to": "e",
+                "weight": 14
+            },
+            {
+                "from": "c",
+                "to": "d",
+                "weight": 3
+            },
+            {
+                "from": "d",
+                "to": "e",
+                "weight": 1
+            },
+            {
+                "from": "d",
+                "to": "f",
+                "weight": 10
+            },
+            {
+                "from": "e",
+                "to": "f",
+                "weight": 11
+            }
+        ]
+    },
+    "start_node": "a",
+    "end_node": "f",
+    "steps": [
+        {
+            "step": "Bước 1",
+            "pseudo": "Khởi tạo dist[a] = 0, các đỉnh khác = ∞",
+            "explain": "Bắt đầu thuật toán Dijkstra. Khởi tạo khoảng cách từ đỉnh xuất phát A đến chính nó là 0, và đến tất cả các đỉnh khác là vô cùng.",
+            "voice": "Khởi tạo thuật toán. Khoảng cách từ A đến A là 0, các đỉnh khác là vô cùng",
+            "duration": 2000,
+            "colors": [
+                "yellow"
+            ],
+            "highlight": {
+                "nodes": [
+                    "a"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 2",
+            "pseudo": "Thêm đỉnh a vào Open",
+            "explain": "Thêm đỉnh xuất phát A vào tập Open (các đỉnh đang chờ xử lý)",
+            "voice": "Thêm đỉnh A vào tập Open",
+            "duration": 1500,
+            "colors": [
+                "yellow"
+            ],
+            "highlight": {
+                "nodes": [
+                    "a"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 3",
+            "pseudo": "Lấy đỉnh a từ Open (dist=0)",
+            "explain": "Chọn đỉnh A từ tập Open vì nó có khoảng cách nhỏ nhất (0)",
+            "voice": "Chọn đỉnh A từ Open vì có khoảng cách nhỏ nhất",
+            "duration": 1500,
+            "colors": [
+                "red"
+            ],
+            "highlight": {
+                "nodes": [
+                    "a"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 4",
+            "pseudo": "Xét các đỉnh kề với a: b, c, d",
+            "explain": "Kiểm tra các đỉnh kề với A là B, C, D",
+            "voice": "Xét các đỉnh láng giềng của A",
+            "duration": 1500,
+            "colors": [
+                "yellow"
+            ],
+            "highlight": {
+                "nodes": [
+                    "b",
+                    "c",
+                    "d"
+                ],
+                "edges": [
+                    "a-b",
+                    "a-c",
+                    "a-d"
+                ]
+            }
+        },
+        {
+            "step": "Bước 5",
+            "pseudo": "Cập nhật dist[b] = 0 + 42 = 42",
+            "explain": "Cập nhật khoảng cách đến B: dist[B] = dist[A] + w(A,B) = 0 + 42 = 42. Thêm B vào Open",
+            "voice": "Cập nhật khoảng cách đến B là 42",
+            "duration": 1800,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "b"
+                ],
+                "edges": [
+                    "a-b"
+                ]
+            }
+        },
+        {
+            "step": "Bước 6",
+            "pseudo": "Cập nhật dist[c] = 0 + 4 = 4",
+            "explain": "Cập nhật khoảng cách đến C: dist[C] = dist[A] + w(A,C) = 0 + 4 = 4. Thêm C vào Open",
+            "voice": "Cập nhật khoảng cách đến C là 4",
+            "duration": 1800,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "c"
+                ],
+                "edges": [
+                    "a-c"
+                ]
+            }
+        },
+        {
+            "step": "Bước 7",
+            "pseudo": "Cập nhật dist[d] = 0 + 10 = 10",
+            "explain": "Cập nhật khoảng cách đến D: dist[D] = dist[A] + w(A,D) = 0 + 10 = 10. Thêm D vào Open",
+            "voice": "Cập nhật khoảng cách đến D là 10",
+            "duration": 1800,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "d"
+                ],
+                "edges": [
+                    "a-d"
+                ]
+            }
+        },
+        {
+            "step": "Bước 8",
+            "pseudo": "Đánh dấu a đã hoàn thành (Close)",
+            "explain": "Chuyển đỉnh A vào tập Close (đã xử lý xong)",
+            "voice": "Đánh dấu đỉnh A đã hoàn thành",
+            "duration": 1500,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "a"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 9",
+            "pseudo": "Lấy đỉnh c từ Open (dist=4)",
+            "explain": "Chọn đỉnh C từ Open vì có khoảng cách nhỏ nhất (4)",
+            "voice": "Chọn đỉnh C từ Open",
+            "duration": 1500,
+            "colors": [
+                "red"
+            ],
+            "highlight": {
+                "nodes": [
+                    "c"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 10",
+            "pseudo": "Xét đỉnh kề d, cập nhật dist[d] = 4 + 3 = 7",
+            "explain": "Kiểm tra đỉnh D kề C. Tìm được đường ngắn hơn: dist[D] = 4 + 3 = 7 < 10. Cập nhật!",
+            "voice": "Tìm được đường đi ngắn hơn đến D qua C",
+            "duration": 2000,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "d"
+                ],
+                "edges": [
+                    "c-d"
+                ]
+            }
+        },
+        {
+            "step": "Bước 11",
+            "pseudo": "Đánh dấu c đã hoàn thành",
+            "explain": "Chuyển C vào Close",
+            "voice": "Đánh dấu đỉnh C hoàn thành",
+            "duration": 1500,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "c"
+                ],
+                "edges": [
+                    "a-c"
+                ]
+            }
+        },
+        {
+            "step": "Bước 12",
+            "pseudo": "Lấy đỉnh d từ Open (dist=7)",
+            "explain": "Chọn D từ Open",
+            "voice": "Chọn đỉnh D",
+            "duration": 1500,
+            "colors": [
+                "red"
+            ],
+            "highlight": {
+                "nodes": [
+                    "d"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 13",
+            "pseudo": "Xét đỉnh e, cập nhật dist[e] = 7 + 1 = 8",
+            "explain": "Cập nhật khoảng cách đến E qua D",
+            "voice": "Cập nhật khoảng cách đến E là 8",
+            "duration": 1800,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "e"
+                ],
+                "edges": [
+                    "d-e"
+                ]
+            }
+        },
+        {
+            "step": "Bước 14",
+            "pseudo": "Đánh dấu d hoàn thành",
+            "explain": "Chuyển D vào Close",
+            "voice": "Đánh dấu D hoàn thành",
+            "duration": 1500,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "d"
+                ],
+                "edges": [
+                    "c-d"
+                ]
+            }
+        },
+        {
+            "step": "Bước 15",
+            "pseudo": "Lấy đỉnh e từ Open (dist=8)",
+            "explain": "Chọn E từ Open",
+            "voice": "Chọn đỉnh E",
+            "duration": 1500,
+            "colors": [
+                "red"
+            ],
+            "highlight": {
+                "nodes": [
+                    "e"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 16",
+            "pseudo": "Xét đỉnh f, cập nhật dist[f] = 8 + 11 = 19",
+            "explain": "Cập nhật khoảng cách đến đỉnh đích F",
+            "voice": "Cập nhật khoảng cách đến đích F là 19",
+            "duration": 2000,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "f"
+                ],
+                "edges": [
+                    "e-f"
+                ]
+            }
+        },
+        {
+            "step": "Bước 17",
+            "pseudo": "Đánh dấu e hoàn thành",
+            "explain": "Chuyển E vào Close",
+            "voice": "Đánh dấu E hoàn thành",
+            "duration": 1500,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "e"
+                ],
+                "edges": [
+                    "d-e"
+                ]
+            }
+        },
+        {
+            "step": "Bước 18",
+            "pseudo": "Kết thúc - Đường đi ngắn nhất: a→c→d→e→f = 19",
+            "explain": "Thuật toán hoàn thành! Đường đi ngắn nhất từ A đến F là: A → C → D → E → F với tổng trọng số 19",
+            "voice": "Hoàn thành! Đường đi ngắn nhất từ A đến F có độ dài 19",
+            "duration": 3000,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "f"
+                ],
+                "edges": [
+                    "e-f"
+                ]
+            }
+        }
+    ]
+}

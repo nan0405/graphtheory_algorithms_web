@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin – Algorithm Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --panel: #111;
+            --border: #222;
+            --accent: #f9c74f;
+            --accent2: #43b89c;
+            --danger: #e53935;
+            --text: #e8e8e8;
+            --muted: #666;
+            --radius: 10px;
+            --font-mono: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── TOP BAR ── */
+        header {
+            background: #000;
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            letter-spacing: 1px;
+        }
+
+        header a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        header a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ── LAYOUT ── */
+        .layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ── SIDEBAR ── */
+        aside {
+            width: 280px;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px 20px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-header h2 {
+            font-size: 13px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #btn-new {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #btn-new:hover {
+            background: #ffdb85;
+        }
+
+        #algo-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .algo-item {
+            padding: 12px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            margin-bottom: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .algo-item:hover {
+            background: #1a1a1a;
+            border-color: #333;
+        }
+
+        .algo-item.active {
+            background: #1a1a1a;
+            border-color: var(--accent);
+        }
+
+        .algo-item .name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .algo-item .desc {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .algo-item .btn-del {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .algo-item .btn-del:hover {
+            color: var(--danger);
+            background: rgba(229, 57, 53, .12);
+        }
+
+        /* ── EDITOR AREA ── */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            background: #0e0e0e;
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-title {
+            font-size: 14px;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .tb-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tb-btn.primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .tb-btn.primary:hover {
+            background: #ffdb85;
+        }
+
+        .tb-btn.success {
+            background: var(--accent2);
+            color: #000;
+        }
+
+        .tb-btn.success:hover {
+            background: #52d0b4;
+        }
+
+        .tb-btn.danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .tb-btn.danger:hover {
+            background: #f44336;
+        }
+
+        .tb-btn.secondary {
+            background: #2a2a2a;
+            color: var(--text);
+            border: 1px solid #444;
+        }
+
+        .tb-btn.secondary:hover {
+            background: #333;
+        }
+
+        .editor-body {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 0;
+            overflow: hidden;
+        }
+
+        .meta-panel {
+            grid-column: 1 / -1;
+            background: #0d0d0d;
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-panel .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .meta-panel label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .meta-panel input,
+        .meta-panel textarea {
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            padding: 8px 12px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            resize: none;
+        }
+
+        .meta-panel input:focus,
+        .meta-panel textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .code-editor {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .code-editor:last-child {
+            border-right: none;
+        }
+
+        .pane-header {
+            background: #0d0d0d;
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pane-badge {
+            background: #1f1f1f;
+            color: var(--accent);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            font-family: var(--font-mono);
+        }
+
+        .code-editor textarea {
+            flex: 1;
+            background: #0c0c0c;
+            color: #a8d8a0;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.6;
+            border: none;
+            padding: 16px;
+            resize: none;
+            tab-size: 2;
+            outline: none;
+        }
+
+        /* ── PREVIEW PANEL ── */
+        .preview-panel {
+            background: #0c0c0c;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #preview-output {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.7;
+            color: #bbb;
+        }
+
+        .preview-step {
+            background: #161616;
+            border: 1px solid #1e1e1e;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+        }
+
+        .preview-step .ps-idx {
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .preview-step .ps-pseudo {
+            color: #ddd;
+        }
+
+        .preview-step .ps-voice {
+            color: var(--accent2);
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .preview-step .ps-highlight {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* ── STATUS BAR ── */
+        .status-bar {
+            background: #080808;
+            border-top: 1px solid var(--border);
+            padding: 8px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+        }
+
+        .status-bar .status-ok {
+            color: var(--accent2);
+        }
+
+        .status-bar .status-err {
+            color: var(--danger);
+        }
+
+        #status-msg {
+            flex: 1;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--muted);
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            opacity: 0.4;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .75);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            width: min(520px, 90vw);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal h3 {
+            color: var(--accent);
+            font-family: var(--font-mono);
+        }
+
+        .modal input,
+        .modal textarea {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: var(--text);
+            padding: 10px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .modal input:focus,
+        .modal textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .modal textarea {
+            font-family: var(--font-mono);
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .modal .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>⚙ Algorithm Admin Panel</h1>
+        <a href="/">← Visualization</a>
+    </header>
+
+    <div class="layout">
+        <!-- ── SIDEBAR ── -->
+        <aside>
+            <div class="sidebar-header">
+                <h2>Algorithms</h2>
+                <button id="btn-new" onclick="openNewModal()">+ New</button>
+            </div>
+            <div id="algo-list">
+                <div class="empty-state" style="height:200px">
+                    <div class="icon">⏳</div>
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ── EDITOR ── -->
+        <main id="main-area">
+            <div class="empty-state" style="height:100%">
+                <div class="icon">🗂</div>
+                <p>Select an algorithm from the sidebar, or create a new one.</p>
+            </div>
+        </main>
+    </div>
+
+    <div class="status-bar">
+        <span id="status-msg">Ready</span>
+        <span id="status-count"></span>
+    </div>
+
+
+    <!-- ── NEW ALGORITHM MODAL ── -->
+    <div class="modal-overlay" id="modal-new">
+        <div class="modal">
+            <h3>New Algorithm</h3>
+            <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Name (e.g. BFS,
+                    Dijkstra)</label>
+                <input id="new-name" type="text" placeholder="AlgorithmName" />
+            </div>
+            <div>
+                <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Description</label>
+                <input id="new-desc" type="text" placeholder="Short description..." />
+            </div>
+            <div class="modal-actions">
+                <button class="tb-btn secondary" onclick="closeModal('modal-new')">Cancel</button>
+                <button class="tb-btn primary" onclick="createNew()">Create</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // ─────────────────────────────────────────────────────────────
+        // State
+        // ─────────────────────────────────────────────────────────────
+        const API = "";
+        let algorithms = [];
+        let currentName = null;
+
+        const TEMPLATE_DSL = {
+            type: "Block",
+            statements: [
+                {
+                    type: "Assign",
+                    left: "dist[startNode]",
+                    right: 0,
+                    pseudo: "Khởi tạo khoảng cách",
+                    voice: "Khởi tạo khoảng cách cho đỉnh bắt đầu bằng 0"
+                },
+                {
+                    type: "While",
+                    condition: { type: "NotEmpty", target: "openSet" },
+                    pseudo: "Lặp khi openSet chưa rỗng",
+                    voice: "Bắt đầu vòng lặp chính",
+                    body: {
+                        type: "Block",
+                        statements: [
+                            {
+                                type: "Assign",
+                                left: "currentNode",
+                                right: {
+                                    type: "ExtractMin",
+                                    queueVar: "openSet",
+                                    distVar: "dist",
+                                    pseudo: "Lấy đỉnh có dist nhỏ nhất",
+                                    voice: "Chọn đỉnh có khoảng cách nhỏ nhất"
+                                },
+                                pseudo: "currentNode = extractMin(openSet)",
+                                voice: "Lấy đỉnh từ hàng đợi"
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+
+        // ─────────────────────────────────────────────────────────────
+        // Init
+        // ─────────────────────────────────────────────────────────────
+        async function init() {
+            await loadAlgorithms();
+        }
+
+        async function loadAlgorithms() {
+            try {
+                const r = await fetch(`${API}/api/admin/algorithms`);
+                const data = await r.json();
+                algorithms = data.algorithms || [];
+                renderSidebar();
+                document.getElementById("status-count").textContent = `${algorithms.length} algorithm(s)`;
+            } catch (e) {
+                setStatus("Error loading algorithms: " + e.message, true);
+            }
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById("algo-list");
+            if (!algorithms.length) {
+                list.innerHTML = `<div class="empty-state" style="height:200px"><div class="icon">📭</div><p>No algorithms yet.</p></div>`;
+                return;
+            }
+            list.innerHTML = algorithms.map(a => `
+      <div class="algo-item ${currentName === a.name ? 'active' : ''}" onclick="selectAlgo('${a.name}')">
+        <div>
+          <div class="name">${a.name}</div>
+          <div class="desc">${a.description || '—'}</div>
+        </div>
+        <button class="btn-del" title="Delete" onclick="event.stopPropagation(); deleteAlgo('${a.name}')">🗑</button>
+      </div>
+    `).join("");
+        }
+
+
+        // ─────────────────────────────────────────────────────────────
+        // Select & render editor
+        // ─────────────────────────────────────────────────────────────
+        async function selectAlgo(name) {
+            currentName = name;
+            renderSidebar();
+            setStatus(`Loading ${name}...`);
+
+            try {
+                const r = await fetch(`${API}/api/admin/algorithms/${name}`);
+                const dsl = await r.json();
+                renderEditor(name, dsl);
+                setStatus(`Loaded: ${name}`);
+            } catch (e) {
+                setStatus("Error loading algorithm: " + e.message, true);
+            }
+        }
+
+
+        function renderEditor(name, dsl) {
+            const main = document.getElementById("main-area");
+            main.innerHTML = `
+      <div class="editor-toolbar">
+        <span class="toolbar-title">${name}.json</span>
+        <button class="tb-btn secondary" onclick="validateDSL()">✓ Validate</button>
+        <button class="tb-btn success"   onclick="saveDSL('${name}')">💾 Save</button>
+        <button class="tb-btn primary"   onclick="testRun('${name}')">▶ Test Run</button>
+        <button class="tb-btn danger"    onclick="deleteAlgo('${name}')">🗑 Delete</button>
+      </div>
+
+      <div class="editor-body">
+        <div class="meta-panel">
+          <div class="field">
+            <label>Algorithm Name</label>
+            <input id="ed-name" value="${escHtml(dsl.name || name)}" readonly />
+          </div>
+          <div class="field" style="flex:3">
+            <label>Description</label>
+            <input id="ed-desc" value="${escHtml(dsl.description || '')}" placeholder="Short description..." />
+          </div>
+          <div class="field">
+            <label>Init Variables (JSON)</label>
+            <textarea id="ed-init" rows="2">${escHtml(JSON.stringify(dsl.init || {}, null, 2))}</textarea>
+          </div>
+        </div>
+
+        <div class="code-editor">
+          <div class="pane-header">
+            AST Program (JSON)
+            <span class="pane-badge">DSL</span>
+          </div>
+          <textarea id="ed-program" spellcheck="false">${escHtml(JSON.stringify(dsl.program || {}, null, 2))}</textarea>
+        </div>
+
+        <div class="code-editor preview-panel">
+          <div class="pane-header">
+            Test Run Preview
+            <span class="pane-badge">Output</span>
+          </div>
+          <div id="preview-output">
+            <p style="color:#555; padding:10px">Click "▶ Test Run" to see the algorithm timeline.</p>
+          </div>
+        </div>
+      </div>
+    `;
+        }
+
+
+        // ─────────────────────────────────────────────────────────────
+        // CRUD actions
+        // ─────────────────────────────────────────────────────────────
+        async function saveDSL(name) {
+            const payload = buildPayload(name);
+            if (!payload) return;
+
+            try {
+                const r = await fetch(`${API}/api/admin/algorithms/${name}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                if (!r.ok) {
+                    const e = await r.json().catch(() => ({}));
+                    throw new Error(e.detail || r.statusText);
+                }
+                setStatus(`✅ Saved: ${name}`);
+                await loadAlgorithms();
+            } catch (e) {
+                setStatus("Save error: " + e.message, true);
+            }
+        }
+
+        function validateDSL() {
+            const payload = buildPayload(currentName);
+            if (payload) setStatus("✅ DSL is valid JSON");
+        }
+
+        async function testRun(name) {
+            const payload = buildPayload(name);
+            if (!payload) return;
+            setStatus("Running test...");
+
+            // Save first
+            try {
+                await fetch(`${API}/api/admin/algorithms/${name}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+            } catch (_) { }
+
+            // Run with a sample graph
+            const testGraph = {
+                nodes: ["a", "b", "c", "d"],
+                edges: [
+                    { source: "a", target: "b", weight: 4, id: "a-b" },
+                    { source: "a", target: "c", weight: 2, id: "a-c" },
+                    { source: "b", target: "d", weight: 5, id: "b-d" },
+                    { source: "c", target: "d", weight: 1, id: "c-d" },
+                ],
+                directed: false,
+            };
+            try {
+                const r = await fetch(`${API}/api/algorithm/run`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        algorithmName: name,
+                        graph: testGraph,
+                        startNode: "a",
+                        endNode: "d",
+                    }),
+                });
+                const data = await r.json();
+                if (!r.ok) throw new Error(data.detail || r.statusText);
+
+                renderPreview(data.steps || []);
+                setStatus(`✅ Test run OK – ${data.totalSteps} steps`);
+            } catch (e) {
+                setStatus("Test run error: " + e.message, true);
+                document.getElementById("preview-output").innerHTML =
+                    `<pre style="color:#e53935;white-space:pre-wrap">${escHtml(e.message)}</pre>`;
+            }
+        }
+
+        function renderPreview(steps) {
+            const el = document.getElementById("preview-output");
+            if (!steps.length) { el.innerHTML = "<p style='color:#555'>No steps generated.</p>"; return; }
+            el.innerHTML = steps.map((s, i) => `
+      <div class="preview-step">
+        <div class="ps-idx">Step ${i + 1}</div>
+        <div class="ps-pseudo">${escHtml(s.pseudo || "")}</div>
+        ${s.voice ? `<div class="ps-voice">🔊 ${escHtml(s.voice)}</div>` : ""}
+        ${(s.highlight?.nodes?.length || s.highlight?.edges?.length) ? `
+          <div class="ps-highlight">
+            ${s.highlight?.nodes?.length ? `nodes: [${s.highlight.nodes.join(", ")}]` : ""}
+            ${s.highlight?.edges?.length ? ` | edges: [${s.highlight.edges.join(", ")}]` : ""}
+          </div>` : ""}
+      </div>
+    `).join("");
+        }
+
+        async function deleteAlgo(name) {
+            if (!confirm(`Delete algorithm "${name}"? This cannot be undone.`)) return;
+            try {
+                const r = await fetch(`${API}/api/admin/algorithms/${name}`, { method: "DELETE" });
+                if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+                setStatus(`Deleted: ${name}`);
+                if (currentName === name) {
+                    currentName = null;
+                    document.getElementById("main-area").innerHTML = `
+          <div class="empty-state" style="height:100%">
+            <div class="icon">🗂</div><p>Select or create an algorithm.</p>
+          </div>`;
+                }
+                await loadAlgorithms();
+            } catch (e) {
+                setStatus("Delete error: " + e.message, true);
+            }
+        }
+
+
+        // ─────────────────────────────────────────────────────────────
+        // New algorithm modal
+        // ─────────────────────────────────────────────────────────────
+        function openNewModal() {
+            document.getElementById("new-name").value = "";
+            document.getElementById("new-desc").value = "";
+            document.getElementById("modal-new").classList.add("show");
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove("show");
+        }
+
+        async function createNew() {
+            const name = document.getElementById("new-name").value.trim();
+            const desc = document.getElementById("new-desc").value.trim();
+
+            if (!name) { alert("Name is required"); return; }
+            if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(name)) {
+                alert("Name must start with a letter and contain only letters, numbers, underscores");
+                return;
+            }
+
+            const payload = {
+                name,
+                description: desc,
+                init: {},
+                program: TEMPLATE_DSL,
+            };
+
+            try {
+                const r = await fetch(`${API}/api/admin/algorithms`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                if (!r.ok) {
+                    const e = await r.json().catch(() => ({}));
+                    throw new Error(e.detail || r.statusText);
+                }
+                closeModal("modal-new");
+                await loadAlgorithms();
+                await selectAlgo(name);
+                setStatus(`Created: ${name}`);
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        }
+
+
+        // ─────────────────────────────────────────────────────────────
+        // Helpers
+        // ─────────────────────────────────────────────────────────────
+        function buildPayload(name) {
+            try {
+                const program = JSON.parse(document.getElementById("ed-program").value);
+                const init = JSON.parse(document.getElementById("ed-init").value || "{}");
+                const desc = document.getElementById("ed-desc").value;
+                return { name, description: desc, program, init };
+            } catch (e) {
+                setStatus("JSON parse error: " + e.message, true);
+                return null;
+            }
+        }
+
+        function setStatus(msg, isError = false) {
+            const el = document.getElementById("status-msg");
+            el.textContent = msg;
+            el.className = isError ? "status-err" : "status-ok";
+            setTimeout(() => { el.className = ""; }, 5000);
+        }
+
+        function escHtml(str) {
+            if (str === undefined || str === null) return "";
+            return String(str)
+                .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        // Close modal on overlay click
+        document.addEventListener("click", e => {
+            if (e.target.classList.contains("modal-overlay")) e.target.classList.remove("show");
+        });
+
+        // Keyboard shortcut: Ctrl+S to save
+        document.addEventListener("keydown", e => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+                e.preventDefault();
+                if (currentName) saveDSL(currentName);
+            }
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,5 @@
+fastapi>=0.109
+uvicorn[standard]>=0.27
+openai>=1.10
+google-cloud-texttospeech>=2.16          # only if TTS_BACKEND=google
+python-dotenv>=1.0

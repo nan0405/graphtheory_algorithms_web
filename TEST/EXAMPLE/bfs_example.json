@@ -1,0 +1,334 @@
+{
+    "algorithm": {
+        "name": "Thuật toán BFS (Breadth-First Search)",
+        "description": "Duyệt đồ thị theo chiều rộng - Tìm kiếm từng tầng một cách hệ thống"
+    },
+    "graph": {
+        "nodes": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f"
+        ],
+        "edges": [
+            {
+                "from": "a",
+                "to": "b",
+                "weight": null
+            },
+            {
+                "from": "a",
+                "to": "c",
+                "weight": null
+            },
+            {
+                "from": "b",
+                "to": "d",
+                "weight": null
+            },
+            {
+                "from": "b",
+                "to": "e",
+                "weight": null
+            },
+            {
+                "from": "c",
+                "to": "f",
+                "weight": null
+            },
+            {
+                "from": "d",
+                "to": "f",
+                "weight": null
+            }
+        ]
+    },
+    "start_node": "a",
+    "end_node": null,
+    "steps": [
+        {
+            "step": "Bước 1",
+            "pseudo": "Khởi tạo queue rỗng và tập visited",
+            "explain": "Bắt đầu thuật toán BFS với queue (hàng đợi) rỗng và tập visited để đánh dấu các đỉnh đã thăm",
+            "voice": "Khởi tạo queue và tập visited",
+            "duration": 1500,
+            "colors": [
+                "yellow"
+            ],
+            "highlight": {
+                "nodes": [],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 2",
+            "pseudo": "Thêm đỉnh start a vào queue",
+            "explain": "Thêm đỉnh xuất phát A vào queue và đánh dấu đã thăm",
+            "voice": "Thêm đỉnh xuất phát A vào queue",
+            "duration": 1500,
+            "colors": [
+                "yellow"
+            ],
+            "highlight": {
+                "nodes": [
+                    "a"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 3",
+            "pseudo": "Lấy a từ queue",
+            "explain": "Lấy đỉnh A ra khỏi queue để xử lý",
+            "voice": "Lấy đỉnh A từ queue",
+            "duration": 1500,
+            "colors": [
+                "red"
+            ],
+            "highlight": {
+                "nodes": [
+                    "a"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 4",
+            "pseudo": "Xét các đỉnh kề với a: b, c",
+            "explain": "Kiểm tra các đỉnh kề với A là B và C",
+            "voice": "Xét các đỉnh kề với A",
+            "duration": 1500,
+            "colors": [
+                "yellow"
+            ],
+            "highlight": {
+                "nodes": [
+                    "b",
+                    "c"
+                ],
+                "edges": [
+                    "a-b",
+                    "a-c"
+                ]
+            }
+        },
+        {
+            "step": "Bước 5",
+            "pseudo": "Thêm b vào queue và đánh dấu visited",
+            "explain": "Thêm B vào queue và đánh dấu đã thăm",
+            "voice": "Thêm B vào queue",
+            "duration": 1500,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "b"
+                ],
+                "edges": [
+                    "a-b"
+                ]
+            }
+        },
+        {
+            "step": "Bước 6",
+            "pseudo": "Thêm c vào queue và đánh dấu visited",
+            "explain": "Thêm C vào queue và đánh dấu đã thăm",
+            "voice": "Thêm C vào queue",
+            "duration": 1500,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "c"
+                ],
+                "edges": [
+                    "a-c"
+                ]
+            }
+        },
+        {
+            "step": "Bước 7",
+            "pseudo": "Hoàn thành xử lý a",
+            "explain": "Đỉnh A đã được xử lý hoàn toàn",
+            "voice": "Hoàn thành xử lý đỉnh A",
+            "duration": 1500,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "a"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 8",
+            "pseudo": "Lấy b từ queue",
+            "explain": "Lấy B từ queue để xử lý",
+            "voice": "Lấy đỉnh B từ queue",
+            "duration": 1500,
+            "colors": [
+                "red"
+            ],
+            "highlight": {
+                "nodes": [
+                    "b"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 9",
+            "pseudo": "Xét các đỉnh kề với b: d, e",
+            "explain": "Kiểm tra các đỉnh kề với B là D và E",
+            "voice": "Xét các đỉnh kề với B",
+            "duration": 1500,
+            "colors": [
+                "yellow"
+            ],
+            "highlight": {
+                "nodes": [
+                    "d",
+                    "e"
+                ],
+                "edges": [
+                    "b-d",
+                    "b-e"
+                ]
+            }
+        },
+        {
+            "step": "Bước 10",
+            "pseudo": "Thêm d vào queue",
+            "explain": "Thêm D vào queue",
+            "voice": "Thêm D vào queue",
+            "duration": 1500,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "d"
+                ],
+                "edges": [
+                    "b-d"
+                ]
+            }
+        },
+        {
+            "step": "Bước 11",
+            "pseudo": "Thêm e vào queue",
+            "explain": "Thêm E vào queue",
+            "voice": "Thêm E vào queue",
+            "duration": 1500,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "e"
+                ],
+                "edges": [
+                    "b-e"
+                ]
+            }
+        },
+        {
+            "step": "Bước 12",
+            "pseudo": "Hoàn thành xử lý b",
+            "explain": "Đỉnh B đã được xử lý",
+            "voice": "Hoàn thành xử lý B",
+            "duration": 1500,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "b"
+                ],
+                "edges": [
+                    "a-b"
+                ]
+            }
+        },
+        {
+            "step": "Bước 13",
+            "pseudo": "Lấy c từ queue",
+            "explain": "Lấy C từ queue",
+            "voice": "Lấy C từ queue",
+            "duration": 1500,
+            "colors": [
+                "red"
+            ],
+            "highlight": {
+                "nodes": [
+                    "c"
+                ],
+                "edges": []
+            }
+        },
+        {
+            "step": "Bước 14",
+            "pseudo": "Xét đỉnh kề f, thêm vào queue",
+            "explain": "Thêm F vào queue",
+            "voice": "Thêm F vào queue",
+            "duration": 1500,
+            "colors": [
+                "green"
+            ],
+            "highlight": {
+                "nodes": [
+                    "f"
+                ],
+                "edges": [
+                    "c-f"
+                ]
+            }
+        },
+        {
+            "step": "Bước 15",
+            "pseudo": "Hoàn thành xử lý c",
+            "explain": "Đỉnh C đã xử lý xong",
+            "voice": "Hoàn thành C",
+            "duration": 1500,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "c"
+                ],
+                "edges": [
+                    "a-c"
+                ]
+            }
+        },
+        {
+            "step": "Bước 16",
+            "pseudo": "Kết thúc BFS - Đã duyệt toàn bộ đồ thị",
+            "explain": "Thuật toán BFS hoàn thành! Đã thăm tất cả các đỉnh theo thứ tự: A → B, C → D, E, F",
+            "voice": "Hoàn thành duyệt đồ thị theo chiều rộng",
+            "duration": 2500,
+            "colors": [
+                "blue"
+            ],
+            "highlight": {
+                "nodes": [
+                    "d",
+                    "e",
+                    "f"
+                ],
+                "edges": [
+                    "b-d",
+                    "b-e",
+                    "c-f"
+                ]
+            }
+        }
+    ]
+}

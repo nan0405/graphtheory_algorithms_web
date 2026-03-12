@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Graph Algorithm Visualization — AI Powered</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <style>
+        /* ========== YOUR ORIGINAL CSS (preserved exactly) ========== */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background: #fff;
+        }
+
+        #explanation-wrapper {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+            background: #000;
+            transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+        }
+
+        #controls {
+            overflow: hidden;
+            transition: width 0.7s ease-in-out, opacity 0.7s ease-in-out;
+            will-change: transform, opacity;
+            width: 250px;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        body.playing #controls {
+            transform: translateX(-260px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #controls button {
+            width: 100%;
+            background: #3b3b3b;
+            font-size: 15px;
+            border: none;
+            padding: 12px 0;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        #controls button:hover {
+            background: #f9c74f;
+            color: #000;
+            transform: translateX(3px);
+        }
+
+        .input-group {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group input {
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        /* ===== Floating Menu ===== */
+        #floating-menu-container {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            transform: translateX(-20px);
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        body.playing #floating-menu-container {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        #floating-menu-btn {
+            background: #f9c74f;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 15px 14px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #444;
+            width: 180px;
+        }
+
+        #floating-menu-btn:hover {
+            background: #A2D2FF !important;
+            color: #000 !important;
+        }
+
+        #floating-menu-dropdown {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            width: 130px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #floating-menu-dropdown.show {
+            display: flex;
+        }
+
+        #floating-menu-dropdown button {
+            width: 100%;
+            text-align: left;
+            padding: 8px 10px !important;
+            font-size: 12px;
+            background: #444 !important;
+            border-radius: 4px;
+        }
+
+        #floating-menu-dropdown button:hover {
+            background: #f9c74f !important;
+            color: #000 !important;
+        }
+
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        #canvas {
+            width: 98%;
+            height: 80%;
+            flex: 1;
+            margin: 10px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #graph {
+            width: 90%;
+            height: 100%;
+        }
+
+        #footer {
+            background: #0e0e0e;
+            color: #fff;
+            width: 100%;
+            padding: 40px 0px 40px 0px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            font-size: 1em;
+        }
+
+        #footer button {
+            background: #f9c74f;
+            border: none;
+            padding: 15px 21px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+        }
+
+        #steps {
+            width: 350px;
+            min-width: 0px;
+            background: #000;
+            padding: 20px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        #steps h3 {
+            margin-top: 0;
+        }
+
+        .state-node {
+            color: #9ca3af;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: color 0.25s, background 0.25s;
+        }
+
+        #dist-state,
+        #pre-state {
+            color: #f9c74f;
+        }
+
+        h3 {
+            color: #ff9900;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+        }
+
+        pre span {
+            display: block;
+            line-height: 0;
+            margin: 0;
+            white-space: pre;
+        }
+
+        #state-display {
+            display: none;
+            background: #1a1a1a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #535252;
+        }
+
+        #state-display h3 {
+            color: #FFD700;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        #state-display .state-item {
+            font-size: 15px;
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+            word-wrap: break-word;
+        }
+
+        .state-item {
+            color: #9ca3af;
+            font-family: "Courier New", monospace;
+        }
+
+        #state-display #stateT {
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        #state-display #stateH {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        #state-display #stateQ {
+            color: #00e676;
+            font-weight: bold;
+        }
+
+        #state-display #dist-state,
+        #state-display #pre-state {
+            color: #f9c74f;
+            font-weight: bold;
+        }
+
+        #color-legend {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 190px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-size: 13px;
+            pointer-events: none;
+        }
+
+        #color-legend h4 {
+            margin: 0 0 8px;
+            color: #000;
+            font-size: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .legend-color.yellow {
+            background: #ffc107;
+        }
+
+        .legend-color.red {
+            background: #e53935;
+        }
+
+        .legend-color.green {
+            background: #00e676;
+        }
+
+        .legend-color.blue {
+            background: #1976d2;
+        }
+
+        #eye {
+            position: absolute;
+            font-size: 18px;
+            color: #000;
+            top: 55px;
+            right: 12px;
+            z-index: 1001;
+            background: #f9c74f;
+            border: 1px solid #000;
+            padding: 0px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        body.playing #eye {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #eye:hover {
+            background: #A2D2FF !important;
+            border: 1px solid #000;
+        }
+
+        #eye:hover h4,
+        #eye:hover h1 {
+            color: #000 !important;
+        }
+
+        #eye span {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #eye h1,
+        #eye h4 {
+            margin: 0;
+        }
+
+        #explanation-wrapper.show-steps {
+            width: 850px;
+            opacity: 1;
+        }
+
+        #content-wrapper {
+            display: flex;
+            width: 100vw;
+            transition: all 0.7s ease-in-out;
+        }
+
+        #content-wrapper.explain-open #main {
+            width: calc(100vw - 850px);
+        }
+
+        #pseudocode-panel {
+            width: 500px;
+            min-width: 350px;
+            font-size: 1em;
+            background: #111;
+            color: #ffffff;
+            padding: 15px;
+            flex-shrink: 0;
+            font-family: "Courier New", monospace;
+        }
+
+        #pseudocode-panel span {
+            display: block;
+            padding: 4px 6px;
+            border-radius: 4px;
+            transition: all 0.25s;
+        }
+
+        #pseudocode-panel span.active {
+            background: #f9c74f;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(249, 199, 79, 0.6);
+            padding: 15px;
+        }
+
+        .step-entry {
+            margin: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            cursor: pointer;
+            color: #ffffff;
+            opacity: 0.9;
+            transition: all 0.25s ease;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .step-entry.active {
+            background: #f9c74f;
+            color: #000000;
+            font-weight: bold;
+            opacity: 1;
+            box-shadow: 0 0 10px rgba(249, 199, 79, 0.8);
+            transform: scale(1.01);
+            font-size: 18px;
+        }
+
+        #notification {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 1000;
+        }
+
+        #notification.show {
+            opacity: 1;
+        }
+
+        #notification.success {
+            background-color: #4caf50;
+        }
+
+        #notification.error {
+            background-color: #f44336;
+        }
+
+        #notification.info {
+            background-color: #1976d2;
+        }
+
+        body.playing #main {
+            width: 100vw;
+        }
+
+        body.playing #canvas {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        body.playing #controls>button {
+            display: none;
+        }
+
+        body.playing #normal-buttons {
+            display: none;
+        }
+
+        body.playing #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: auto;
+            background: transparent;
+            z-index: 1000;
+        }
+
+        #normal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .input-vertical-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-field label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        #startNodeInput,
+        #endNodeInput {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
+            padding: 12px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        #startNodeInput:focus,
+        #endNodeInput:focus {
+            border-color: #f9c74f;
+            background: #222;
+            outline: none;
+            box-shadow: 0 0 5px rgba(249, 199, 79, 0.2);
+        }
+
+        /* ===== NEW: Algorithm Selector ===== */
+        #algo-select {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            box-sizing: border-box;
+            appearance: auto;
+        }
+
+        #algo-select:focus {
+            border-color: #f9c74f;
+            outline: none;
+        }
+
+        #algo-select option {
+            background: #222;
+            color: #fff;
+        }
+
+        .input-field select {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
+            padding: 10px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* ===== Loading spinner overlay ===== */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #f9c74f;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #loading-overlay span {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* step-title inside dynamic-steps-area */
+        .step-title {
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            margin: 0 10px 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== LEFT CONTROL PANEL ===== -->
+    <div id="controls">
+        <div id="normal-buttons">
+
+            <!-- Algorithm selector (NEW) -->
+            <div class="input-field">
+                <label>Algorithm</label>
+                <select id="algo-select" onchange="onAlgoChange()">
+                    <option value="dijkstra">Dijkstra</option>
+                    <option value="bfs">BFS</option>
+                    <option value="dfs">DFS</option>
+                    <option value="prim">Prim (MST)</option>
+                    <option value="kruskal">Kruskal (MST)</option>
+                </select>
+            </div>
+
+            <div class="input-vertical-stack">
+                <div class="input-field">
+                    <label>Start Node</label>
+                    <input type="text" id="startNodeInput" placeholder="VD: A" maxlength="5" />
+                </div>
+                <div class="input-field">
+                    <label>End Node</label>
+                    <input type="text" id="endNodeInput" placeholder="VD: F" maxlength="5" />
+                </div>
+            </div>
+
+            <button onclick="showCreate()">Create Graph</button>
+            <div id="createForm" style="display:none">
+                <div class="input-group">
+                    <label>Node Name</label>
+                    <input type="text" id="nodeName" />
+                    <button onclick="addNode()">Add Node</button>
+                    <button onclick="removeNode()">Remove Node</button>
+                </div>
+                <div class="input-group">
+                    <label>From – To – Value</label>
+                    <input type="text" id="fromNode" placeholder="From" />
+                    <input type="text" id="toNode" placeholder="To" />
+                    <input type="number" id="edgeValue" placeholder="Value" />
+                    <button onclick="addEdge()">Add Edge</button>
+                    <button onclick="removeEdge()">Remove Edge</button>
+                </div>
+            </div>
+
+            <button onclick="resetGraph()">Reset</button>
+        </div>
+    </div>
+
+    <!-- ===== FLOATING MENU (while playing) ===== -->
+    <div id="floating-menu-container">
+        <button id="floating-menu-btn" onclick="toggleMenu()">Chỉnh sửa đồ thị</button>
+        <div id="floating-menu-dropdown" class="dropdown-content">
+            <button onclick="backToEditMode(); showCreate()">Create Graph</button>
+            <button onclick="backToEditMode(); resetGraph()">Reset</button>
+        </div>
+    </div>
+
+    <!-- ===== EYE toggle ===== -->
+    <div id="eye" onclick="toggleExplanation()">
+        <span>
+            <h1>👀</h1>
+            <h4>Hiện thuật giải</h4>
+        </span>
+    </div>
+
+    <!-- ===== MAIN CONTENT AREA ===== -->
+    <div id="content-wrapper">
+        <div id="main">
+            <div id="canvas">
+                <svg id="graph" viewBox="0 0 600 500" preserveAspectRatio="xMidYMid meet"></svg>
+                <div id="color-legend">
+                    <h4>Ghi chú màu</h4>
+                    <div class="legend-item"><span class="legend-color yellow"></span> Chỉ xét</div>
+                    <div class="legend-item"><span class="legend-color red"></span> Đang xét</div>
+                    <div class="legend-item"><span class="legend-color green"></span> Cập nhật Dist</div>
+                    <div class="legend-item"><span class="legend-color blue"></span> Đỉnh đã chốt</div>
+                </div>
+            </div>
+
+            <div id="footer">
+                <button onclick="prevStep()">⏮</button>
+                <button id="playPauseBtn" onclick="togglePlayPause()">▶</button>
+                <button onclick="nextStep()">⏭</button>
+                <button id="toggleVoice" onclick="toggleVoice()">🔊 Voice: ON</button>
+                <label>Speed: <input type="range" min="1" max="5" value="3" id="speed" /></label>
+            </div>
+        </div>
+
+        <!-- ===== RIGHT PANEL: Steps + Pseudocode ===== -->
+        <div id="explanation-wrapper">
+            <div id="steps">
+                <h3 id="steps-title">STEP</h3>
+                <div id="dynamic-steps-area"></div>
+                <div id="state-display">
+                    <h3>Trạng thái</h3>
+                    <div id="stateT" class="state-item">Close = {}</div>
+                    <div id="stateQ" class="state-item">Open = {}</div>
+                    <div id="stateH" class="state-item">H = {}</div>
+                    <div id="dist-state" class="state-item">Dist = {}</div>
+                    <div id="pre-state" class="state-item">Pre = {}</div>
+                </div>
+            </div>
+
+            <div id="pseudocode-panel">
+                <h3 id="pseudo-title">PSEUDOCODE</h3>
+                <pre id="pseudocode-lines"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <span id="loading-text">AI đang phân tích thuật toán…</span>
+    </div>
+
+    <!-- ===== NOTIFICATION ===== -->
+    <div id="notification"></div>
+
+    <!-- ========================================================================
+     MAIN SCRIPT
+     ======================================================================== -->
+    <script>
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 1.  GRAPH DATA  (default graph — same as your original)
+        // ─────────────────────────────────────────────────────────────────────────────
+        let nodes = [
+            { id: "a", x: 300, y: 40, _fixed: true },
+            { id: "b", x: 100, y: 160, _fixed: true },
+            { id: "c", x: 500, y: 160, _fixed: true },
+            { id: "d", x: 500, y: 340, _fixed: true },
+            { id: "e", x: 100, y: 340, _fixed: true },
+            { id: "f", x: 300, y: 460, _fixed: true },
+        ];
+
+        let links = [
+            { source: "a", target: "b", weight: 42, id: "a-b" },
+            { source: "a", target: "c", weight: 4, id: "a-c" },
+            { source: "a", target: "d", weight: 10, id: "a-d" },
+            { source: "b", target: "e", weight: 14, id: "b-e" },
+            { source: "b", target: "f", weight: 3, id: "b-f" },
+            { source: "c", target: "d", weight: 3, id: "c-d" },
+            { source: "d", target: "e", weight: 1, id: "d-e" },
+            { source: "e", target: "f", weight: 11, id: "e-f" },
+            { source: "e", target: "a", weight: 9, id: "e-a" },
+            { source: "d", target: "f", weight: 10, id: "d-f" },
+            { source: "c", target: "f", weight: 5, id: "c-f" },
+        ];
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 2.  PSEUDOCODE TEMPLATES  (one per algorithm)
+        // ─────────────────────────────────────────────────────────────────────────────
+        const PSEUDOCODES = {
+            dijkstra: [
+                { key: "init-close", text: "1.1 Close = ∅" },
+                { key: "init-dist", text: "1.2 Prev(v) = null, Dist(v) = ∞" },
+                { key: "init-start", text: "1.3 Dist[bắt đầu] = 0" },
+                { key: "init-open", text: "1.4 Open = {bắt đầu}" },
+                { key: "loop", text: "Bước 2: Lặp cho đến khi Open rỗng:" },
+                { key: "pick-min", text: "  2.1 Lấy x ∈ Open sao cho Dist(x) nhỏ nhất" },
+                { key: "add-close", text: "  2.2 Thêm x vào Close" },
+                { key: "for", text: "  2.3 Xét các đỉnh y kề với x & không thuộc Close:" },
+                { key: "if1", text: "    2.3.1 y là đỉnh mới" },
+                { key: "if11", text: "       • Thêm y vào Open" },
+                { key: "if12", text: "       • Cập nhật trọng số: w(y) = w(x) + w(x,y)" },
+                { key: "if13", text: "       • Cập nhật node cha" },
+                { key: "if2", text: "    2.3.2 y đã thuộc Open:" },
+                { key: "if21", text: "       • Nếu w(y) > w(x) + w(x,y)" },
+                { key: "if22", text: "       • Cập nhật trọng số: w(y) = w(x) + w(x,y)" },
+                { key: "if23", text: "       • Cập nhật node cha" },
+                { key: "end-loop", text: "Bước 3: Kết luận đường đi ngắn nhất và trọng số đạt được." },
+            ],
+            bfs: [
+                { key: "init", text: "1. Queue Q = {start}" },
+                { key: "init-visit", text: "2. Visited = {start}" },
+                { key: "loop", text: "3. Lặp khi Q không rỗng:" },
+                { key: "dequeue", text: "   3.1 u = dequeue(Q)" },
+                { key: "for", text: "   3.2 Xét các đỉnh v kề của u:" },
+                { key: "if-visit", text: "      3.2.1 Nếu v chưa được thăm:" },
+                { key: "mark", text: "         • Đánh dấu v đã thăm" },
+                { key: "enqueue", text: "         • enqueue(Q, v)" },
+                { key: "end", text: "4. Kết thúc BFS" },
+            ],
+            dfs: [
+                { key: "init", text: "1. Stack S = {start}" },
+                { key: "init-visit", text: "2. Visited = ∅" },
+                { key: "loop", text: "3. Lặp khi S không rỗng:" },
+                { key: "pop", text: "   3.1 u = pop(S)" },
+                { key: "if-visit", text: "   3.2 Nếu u chưa thăm:" },
+                { key: "mark", text: "      • Đánh dấu u đã thăm" },
+                { key: "for", text: "      • Xét các đỉnh v kề của u:" },
+                { key: "push", text: "         – Nếu v chưa thăm → push(S, v)" },
+                { key: "end", text: "4. Kết thúc DFS" },
+            ],
+            prim: [
+                { key: "init", text: "1. Chọn đỉnh bắt đầu, MST = {start}" },
+                { key: "init-edge", text: "2. EdgeSet = các cạnh kề của start" },
+                { key: "loop", text: "3. Lặp |V|−1 lần:" },
+                { key: "pick-min", text: "   3.1 Lấy cạnh (u,v) có trọng số nhỏ nhất" },
+                { key: "if-not", text: "   3.2 Nếu v chưa thuộc MST:" },
+                { key: "add-node", text: "      • Thêm v vào MST" },
+                { key: "add-edge", text: "      • Thêm cạnh (u,v) vào MST" },
+                { key: "update", text: "      • Cập nhật EdgeSet với các cạnh kề của v" },
+                { key: "end", text: "4. MST hoàn thành" },
+            ],
+            kruskal: [
+                { key: "init", text: "1. Sắp xếp các cạnh theo trọng số tăng" },
+                { key: "init-uf", text: "2. Union-Find: mỗi đỉnh là một tập" },
+                { key: "loop", text: "3. Lặp qua các cạnh theo thứ tự:" },
+                { key: "pick", text: "   3.1 Lấy cạnh (u,v) nhỏ nhất chưa xét" },
+                { key: "if-cycle", text: "   3.2 Nếu u và v thuộc tập khác nhau:" },
+                { key: "union", text: "      • Union(u, v)" },
+                { key: "add-edge", text: "      • Thêm (u,v) vào MST" },
+                { key: "end", text: "4. MST hoàn thành (|V|−1 cạnh)" },
+            ],
+        };
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 3.  D3 SETUP  (identical to your original)
+        // ─────────────────────────────────────────────────────────────────────────────
+        const svg = d3.select("#graph");
+        const viewBox = svg.attr("viewBox").split(" ");
+        const width = +viewBox[2];
+        const height = +viewBox[3];
+
+        svg.append("defs").append("marker")
+            .attr("id", "arrow").attr("viewBox", "0 -5 10 10")
+            .attr("refX", 25).attr("refY", 0)
+            .attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
+            .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#ffc107");
+
+        let simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(d => d.id).distance(110))
+            .force("charge", d3.forceManyBody().strength(-400))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collide", d3.forceCollide().radius(40))
+            .force("x", d3.forceX(width / 2).strength(0.05))
+            .force("y", d3.forceY(height / 2).strength(0.05));
+
+        let linkGroup = svg.append("g").attr("class", "links");
+        let nodeGroup = svg.append("g").attr("class", "nodes");
+        let labelGroup = svg.append("g").attr("class", "labels");
+        let weightGroup = svg.append("g").attr("class", "weights");
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 4.  STATE
+        // ─────────────────────────────────────────────────────────────────────────────
+        let persistedBlueEdges = new Set();
+        let persistedBlueNodes = new Set();
+        let serverSteps = [];
+        let currentStepIndex = -1;
+        let running = false;
+        let stepTimer = null;
+        let isPlaying = false;
+        let voiceEnabled = true;
+        let notificationTimer = null;
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 5.  HELPER FUNCTIONS
+        // ─────────────────────────────────────────────────────────────────────────────
+        function normId(raw) { return raw ? raw.toString().trim().toLowerCase() : ""; }
+
+        function getEndpoints(link) {
+            const s = link.source && link.source.id ? link.source.id : link.source;
+            const t = link.target && link.target.id ? link.target.id : link.target;
+            return { s, t };
+        }
+
+        function ensureLinkIds() {
+            links.forEach(l => { const { s, t } = getEndpoints(l); if (!l.id) l.id = `${s}-${t}`; });
+        }
+
+        function sameEdge(eid1, eid2) {
+            const [a1, b1] = eid1.toLowerCase().split("-");
+            const [a2, b2] = eid2.toLowerCase().split("-");
+            return (a1 === a2 && b1 === b2) || (a1 === b2 && b1 === a2);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 6.  NOTIFICATION
+        // ─────────────────────────────────────────────────────────────────────────────
+        function showNotification(message, type = "info") {
+            const el = document.getElementById("notification");
+            if (notificationTimer) clearTimeout(notificationTimer);
+            el.innerText = message;
+            el.className = type + " show";
+            notificationTimer = setTimeout(() => { el.classList.remove("show"); notificationTimer = null; }, 3500);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 7.  PSEUDOCODE PANEL RENDER
+        // ─────────────────────────────────────────────────────────────────────────────
+        function renderPseudocodePanel() {
+            const algo = document.getElementById("algo-select").value;
+            const lines = PSEUDOCODES[algo] || [];
+            const container = document.getElementById("pseudocode-lines");
+            container.innerHTML = "";
+            lines.forEach(l => {
+                const span = document.createElement("span");
+                span.setAttribute("data-pc", l.key);
+                span.textContent = l.text;
+                container.appendChild(span);
+            });
+            document.getElementById("pseudo-title").textContent = "PSEUDOCODE – " + algo.toUpperCase();
+            document.getElementById("steps-title").textContent = "STEP – " + algo.toUpperCase();
+        }
+
+        function onAlgoChange() {
+            renderPseudocodePanel();
+            // reset steps if any
+            serverSteps = [];
+            currentStepIndex = -1;
+            renderStepsList();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 8.  D3 GRAPH RENDERING  (kept identical to your original)
+        // ─────────────────────────────────────────────────────────────────────────────
+        function restart() {
+            ensureLinkIds();
+            linkGroup.selectAll("line").remove();
+            weightGroup.selectAll("text").remove();
+
+            const link = linkGroup.selectAll("line").data(links, d => d.id);
+            link.exit().remove();
+            link.enter().append("line")
+                .attr("stroke", "#999").attr("stroke-width", 2)
+                .attr("id", d => "edge-" + d.id)
+                .style("cursor", "pointer");
+
+            const wlabel = weightGroup.selectAll("text").data(links, d => d.id);
+            wlabel.exit().remove();
+            wlabel.enter().append("text")
+                .attr("class", "weight")
+                .attr("data-edge", d => d.id)
+                .attr("fill", "#000").attr("font-size", 18).attr("font-weight", "500")
+                .attr("text-anchor", "middle").style("opacity", 0)
+                .text(d => d.weight);
+
+            const node = nodeGroup.selectAll("circle").data(nodes, d => d.id);
+            node.exit().remove();
+            node.enter().append("circle")
+                .attr("r", 0).attr("fill", "black")
+                .attr("stroke", "#E6BE8A").attr("stroke-width", 4)
+                .attr("id", d => "node-" + d.id)
+                .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+
+            const label = labelGroup.selectAll("text").data(nodes, d => d.id);
+            label.exit().remove();
+            label.enter().append("text")
+                .attr("class", "label").attr("fill", "white")
+                .attr("font-size", 25).attr("font-weight", "700")
+                .attr("text-anchor", "middle").attr("alignment-baseline", "middle")
+                .style("cursor", "grab")
+                .text(d => d.id.toUpperCase())
+                .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+
+            simulation.nodes(nodes);
+            simulation.force("link").links(links);
+            simulation.alpha(1).restart();
+
+            simulation.on("tick", () => {
+                linkGroup.selectAll("line")
+                    .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+                nodeGroup.selectAll("circle")
+                    .attr("cx", d => { if (d._fixed) { d.x = d.x0 ?? d.x; d.fx = d.x; } return d.x; })
+                    .attr("cy", d => { if (d._fixed) { d.y = d.y0 ?? d.y; d.fy = d.y; } return d.y; });
+                labelGroup.selectAll("text").attr("x", d => d.x).attr("y", d => d.y);
+                weightGroup.selectAll("text")
+                    .attr("x", d => (d.source.x + d.target.x) / 2)
+                    .attr("y", d => (d.source.y + d.target.y) / 2);
+            });
+
+            setTimeout(showEdgesGradually, 500);
+            setTimeout(() => {
+                spawnNodes();
+                setTimeout(drawEdges, nodes.length * 200 + 400);
+            }, 400);
+
+            simulation.on("end", () => simulation.stop());
+        }
+
+        function spawnNodes() {
+            nodeGroup.selectAll("circle")
+                .attr("cx", d => d.x).attr("cy", d => d.y).attr("r", 0)
+                .transition().delay((d, i) => i * 150).duration(600).ease(d3.easeBackOut).attr("r", 34);
+            labelGroup.selectAll("text")
+                .attr("x", d => d.x).attr("y", d => d.y).style("opacity", 0)
+                .transition().delay((d, i) => i * 150 + 200).duration(400).style("opacity", 1);
+        }
+
+        function showEdgesGradually() {
+            simulation.stop();
+            linkGroup.selectAll("line")
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.source.x).attr("y2", d => d.source.y).style("opacity", 0)
+                .each(function (d, i) {
+                    d3.select(this).transition().delay(i * 250).duration(600).style("opacity", 1)
+                        .attr("x2", d.target.x).attr("y2", d.target.y).ease(d3.easeLinear);
+                });
+            weightGroup.selectAll("text").style("opacity", 0)
+                .transition().delay((d, i) => i * 250 + 600).duration(300).style("opacity", 1);
+        }
+
+        function drawEdges() {
+            linkGroup.selectAll("line")
+                .attr("x2", d => d.source.x).attr("y2", d => d.source.y)
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .transition().delay((d, i) => i * 200).duration(800)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+        }
+
+        function resetStyles() {
+            linkGroup.selectAll("line").attr("stroke", "#999").attr("stroke-width", 2).style("opacity", 1);
+            weightGroup.selectAll("text").attr("fill", "black").style("opacity", 1);
+            nodeGroup.selectAll("circle").attr("fill", "black").attr("stroke", "#E6BE8A").attr("stroke-width", 6);
+        }
+
+        // drag
+        function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
+        function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
+        function dragended(event, d) { if (!event.active) simulation.alphaTarget(0); d.fx = d.x; d.fy = d.y; }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 9.  GRAPH EDITING (addNode / removeNode / addEdge / removeEdge / reset)
+        // ─────────────────────────────────────────────────────────────────────────────
+        function showCreate() { const f = document.getElementById("createForm"); f.style.display = f.style.display === "none" ? "block" : "none"; }
+
+        function addNode() {
+            let id = normId(document.getElementById("nodeName").value);
+            if (!id) { showNotification("Nhập tên node", "error"); return; }
+            if (nodes.find(n => n.id === id)) { showNotification("Node đã tồn tại", "error"); return; }
+            const x = width / 2 + Math.random() * 50 - 25;
+            const y = height / 2 + Math.random() * 50 - 25;
+            const newNode = { id, x, y, _fixed: true };
+            nodes.push(newNode);
+            nodeGroup.append("circle").data([newNode])
+                .attr("r", 0).attr("fill", "black").attr("stroke", "#E6BE8A").attr("stroke-width", 4)
+                .attr("id", "node-" + id).attr("cx", width / 2).attr("cy", height / 2)
+                .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended))
+                .transition().duration(800).attr("r", 34).attr("cx", x).attr("cy", y);
+            labelGroup.append("text").data([newNode])
+                .attr("class", "label").attr("fill", "white").attr("font-size", 25).attr("font-weight", "700")
+                .attr("text-anchor", "middle").attr("alignment-baseline", "middle").style("cursor", "grab")
+                .text(id.toUpperCase()).attr("x", width / 2).attr("y", height / 2)
+                .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended))
+                .transition().delay(300).duration(500).style("opacity", 1).attr("x", x).attr("y", y);
+            simulation.nodes(nodes); simulation.alpha(0.3).restart();
+            document.getElementById("nodeName").value = "";
+            showNotification(`Đã thêm node '${id}'`, "success");
+        }
+
+        function removeNode() {
+            let id = normId(document.getElementById("nodeName").value);
+            if (!id) { showNotification("Nhập tên node để xóa", "error"); return; }
+            const idx = nodes.findIndex(n => n.id === id);
+            if (idx === -1) { showNotification("Node không tồn tại", "error"); return; }
+            nodes.splice(idx, 1);
+            links = links.filter(l => { const { s, t } = getEndpoints(l); return s !== id && t !== id; });
+            restart();
+            document.getElementById("nodeName").value = "";
+            showNotification(`Đã xóa node '${id}'`, "success");
+        }
+
+        function addEdge() {
+            const src = normId(document.getElementById("fromNode").value);
+            const tgt = normId(document.getElementById("toNode").value);
+            const wRaw = document.getElementById("edgeValue").value.trim();
+            if (!src || !tgt) { showNotification("Nhập source và target", "error"); return; }
+            if (src === tgt) { showNotification("Không thể nối chính nó", "error"); return; }
+            if (!nodes.find(n => n.id === src) || !nodes.find(n => n.id === tgt)) { showNotification("Node không tồn tại", "error"); return; }
+            if (links.find(l => sameEdge(l.id, `${src}-${tgt}`))) { showNotification("Cạnh đã tồn tại", "error"); return; }
+            const weight = wRaw !== "" ? Number(wRaw) : 1;
+            const newEdge = { source: src, target: tgt, weight, id: `${src}-${tgt}` };
+            links.push(newEdge);
+            const sourceNode = nodes.find(n => n.id === src);
+            const targetNode = nodes.find(n => n.id === tgt);
+            linkGroup.append("line").datum(newEdge)
+                .attr("id", "edge-" + newEdge.id).attr("stroke", "#999").attr("stroke-width", 2)
+                .attr("x1", sourceNode.x).attr("y1", sourceNode.y)
+                .attr("x2", sourceNode.x).attr("y2", sourceNode.y).style("opacity", 0)
+                .transition().duration(600).style("opacity", 1).attr("x2", targetNode.x).attr("y2", targetNode.y);
+            weightGroup.append("text").datum(newEdge)
+                .attr("class", "weight").attr("text-anchor", "middle").attr("font-size", 18).attr("fill", "#000")
+                .style("opacity", 0).text(weight)
+                .transition().delay(500).duration(300).style("opacity", 1);
+            simulation.force("link").links(links); simulation.alpha(0.3).restart();
+            document.getElementById("fromNode").value = "";
+            document.getElementById("toNode").value = "";
+            document.getElementById("edgeValue").value = "";
+            showNotification(`Đã thêm cạnh ${src}-${tgt}`, "success");
+        }
+
+        function removeEdge() {
+            const src = normId(document.getElementById("fromNode").value);
+            const tgt = normId(document.getElementById("toNode").value);
+            if (!src || !tgt) { showNotification("Nhập source và target để xóa cạnh", "error"); return; }
+            const idx = links.findIndex(l => { const { s, t } = getEndpoints(l); return (s === src && t === tgt) || (s === tgt && t === src); });
+            if (idx === -1) { showNotification("Cạnh không tồn tại", "error"); return; }
+            links.splice(idx, 1); restart();
+            showNotification(`Đã xóa cạnh ${src}-${tgt}`, "success");
+            document.getElementById("fromNode").value = "";
+            document.getElementById("toNode").value = "";
+        }
+
+        function resetGraph() {
+            stopAnimation(); serverSteps = []; currentStepIndex = -1;
+            nodes.length = 0;
+            [
+                { id: "a", x: 300, y: 40, _fixed: true },
+                { id: "b", x: 100, y: 160, _fixed: true },
+                { id: "c", x: 500, y: 160, _fixed: true },
+                { id: "d", x: 500, y: 340, _fixed: true },
+                { id: "e", x: 100, y: 340, _fixed: true },
+                { id: "f", x: 300, y: 460, _fixed: true },
+            ].forEach(n => nodes.push(n));
+            links = [
+                { source: "a", target: "b", weight: 42, id: "a-b" },
+                { source: "a", target: "c", weight: 4, id: "a-c" },
+                { source: "a", target: "d", weight: 10, id: "a-d" },
+                { source: "b", target: "e", weight: 14, id: "b-e" },
+                { source: "b", target: "f", weight: 3, id: "b-f" },
+                { source: "c", target: "d", weight: 3, id: "c-d" },
+                { source: "d", target: "e", weight: 1, id: "d-e" },
+                { source: "e", target: "f", weight: 11, id: "e-f" },
+                { source: "e", target: "a", weight: 9, id: "e-a" },
+                { source: "d", target: "f", weight: 10, id: "d-f" },
+                { source: "c", target: "f", weight: 5, id: "c-f" },
+            ];
+            persistedBlueEdges.clear(); persistedBlueNodes.clear();
+            renderStepsList(); restart(); resetStyles();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 10. UI CONTROLS  (play / pause / prev / next / eye / menu)
+        // ─────────────────────────────────────────────────────────────────────────────
+        function toggleExplanation() {
+            const w = document.getElementById("explanation-wrapper");
+            const cw = document.getElementById("content-wrapper");
+            w.classList.toggle("show-steps");
+            cw.classList.toggle("explain-open");
+            const icon = document.querySelector("#eye h1");
+            const txt = document.querySelector("#eye h4");
+            if (w.classList.contains("show-steps")) { icon.innerText = "🙈"; txt.innerText = "Ẩn thuật giải"; }
+            else { icon.innerText = "👀"; txt.innerText = "Hiện thuật giải"; }
+        }
+
+        function toggleMenu() {
+            isPlaying = false; document.body.classList.remove("playing");
+            document.getElementById("playPauseBtn").innerText = "▶";
+            pause();
+            const dd = document.getElementById("floating-menu-dropdown");
+            dd.classList.toggle("show");
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.matches('#floating-menu-btn')) {
+                const dd = document.getElementById("floating-menu-dropdown");
+                if (dd && dd.classList.contains('show')) dd.classList.remove('show');
+            }
+        }
+
+        function backToEditMode() {
+            document.body.classList.remove("playing");
+            const w = document.getElementById("explanation-wrapper");
+            const cw = document.getElementById("content-wrapper");
+            if (w) w.classList.remove("show-steps");
+            if (cw) cw.classList.remove("explain-open");
+            const eyeIcon = document.querySelector("#eye h1");
+            const eyeText = document.querySelector("#eye h4");
+            if (eyeIcon) eyeIcon.innerText = "👀";
+            if (eyeText) eyeText.innerText = "Hiện thuật giải";
+            isPlaying = false;
+            document.getElementById("playPauseBtn").textContent = "▶";
+            const dd = document.getElementById("floating-menu-dropdown");
+            if (dd) dd.classList.remove("show");
+        }
+
+        function togglePlayPause() {
+            document.body.classList.add("playing");
+            const btn = document.getElementById("playPauseBtn");
+            if (!isPlaying) { speechSynthesis.cancel(); play(); btn.textContent = "⏸"; isPlaying = true; }
+            else { speechSynthesis.cancel(); pause(); btn.textContent = "▶"; isPlaying = false; }
+        }
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            document.getElementById("toggleVoice").innerText = voiceEnabled ? "🔊 Voice: ON" : "🔇 Voice: OFF";
+            speechSynthesis.cancel();
+        }
+
+        function pause() {
+            running = false;
+            if (stepTimer) { clearTimeout(stepTimer); stepTimer = null; }
+        }
+
+        function stopAnimation() {
+            running = false;
+            if (stepTimer) { clearTimeout(stepTimer); stepTimer = null; }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 11. STEP VISUALS  (IDENTICAL logic to your original)
+        // ─────────────────────────────────────────────────────────────────────────────
+        async function applyStepVisuals(stepIndex, silent = false) {
+            if (!serverSteps || serverSteps.length === 0) return;
+            const cur = serverSteps[stepIndex];
+            if (!cur) return;
+
+            if (silent) {
+                nodeGroup.selectAll("circle")
+                    .filter(d => !persistedBlueNodes.has(d.id.toLowerCase()))
+                    .interrupt().attr("fill", "#000000").attr("stroke", "#666666").attr("stroke-width", 2).style("opacity", 1);
+                linkGroup.selectAll("line")
+                    .filter(d => !persistedBlueEdges.has(d.id.toLowerCase()))
+                    .interrupt().attr("stroke", "#999").attr("stroke-width", 2).style("opacity", 1);
+            }
+
+            document.getElementById("state-display").style.display = "block";
+
+            const pseudo = cur.Pseudo || "";
+            const highlightEdges = (cur.Highlight?.Edges || []).map(e => e.toLowerCase());
+            const highlightNodes = (cur.Highlight?.Nodes || []).map(n => n.toLowerCase());
+
+            // --- pick-min (green flash) ---
+            if (!silent && pseudo.includes("t := get(min(Dist")) {
+                highlightNodes.forEach(n => {
+                    nodeGroup.selectAll("circle").filter(d => d.id.toLowerCase() === n)
+                        .transition().duration(300).attr("fill", "#00e676").attr("stroke", "#00c853").attr("stroke-width", 6);
+                });
+            }
+
+            // --- "Xét các lân cận" → yellow ---
+            if (!silent && pseudo.includes("Xét các lân cận")) {
+                highlightNodes.forEach(n => {
+                    if (!persistedBlueNodes.has(n.toLowerCase())) {
+                        nodeGroup.selectAll("circle").filter(d => d.id.toLowerCase() === n)
+                            .transition().duration(300).attr("fill", "#ffc107").attr("stroke", "#b28900").attr("stroke-width", 6);
+                    }
+                });
+                highlightEdges.forEach(e => {
+                    linkGroup.selectAll("line").filter(d => sameEdge(d.id, e))
+                        .transition().duration(300).attr("stroke", "#ffc107").attr("stroke-width", 4);
+                });
+            }
+
+            // --- "Append(Close" → persist blue ---
+            if (pseudo.includes("Append(Close")) {
+                highlightNodes.forEach(n => {
+                    const nid = n.toLowerCase();
+                    persistedBlueNodes.add(nid);
+                    nodeGroup.selectAll("circle").filter(d => d.id.toLowerCase() === nid)
+                        .transition().duration(400).attr("fill", "#1976d2").attr("stroke", "#0d47a1").attr("stroke-width", 6).style("opacity", 1);
+                });
+                highlightEdges.forEach(e => {
+                    if (!e || e.toLowerCase().includes("none")) return;
+                    const eid = e.toLowerCase();
+                    const [u, v] = eid.split("-");
+                    persistedBlueEdges.add(eid);
+                    persistedBlueEdges.add(`${v}-${u}`);
+                    linkGroup.selectAll("line").filter(d => sameEdge(d.id, eid))
+                        .transition().duration(400).attr("stroke", "#1565c0").attr("stroke-width", 4).style("opacity", 1);
+                });
+            }
+
+            // --- "Xét đỉnh" → red ---
+            if (!silent && pseudo.includes("Xét đỉnh")) {
+                highlightEdges.forEach(e => {
+                    const [, v] = e.split("-");
+                    linkGroup.selectAll("line").filter(d => sameEdge(d.id, e))
+                        .transition().duration(200).attr("stroke", "#e53935").attr("stroke-width", 5);
+                    nodeGroup.selectAll("circle").filter(d => d.id.toLowerCase() === v)
+                        .transition().duration(200).attr("fill", "#e53935").attr("stroke", "#b71c1c").attr("stroke-width", 6);
+                });
+            }
+
+            // --- "Dist[" → green update ---
+            if (!silent && pseudo.includes("Dist[")) {
+                highlightEdges.forEach(e => {
+                    const v = e.split("-")[1].toLowerCase();
+                    linkGroup.selectAll("line").filter(d => sameEdge(d.id, e))
+                        .transition().duration(300).attr("stroke", "#00e676").attr("stroke-width", 5);
+                    nodeGroup.selectAll("circle").filter(d => d.id.toLowerCase() === v)
+                        .transition().duration(300).attr("fill", "#00e676").attr("stroke", "#00c853").attr("stroke-width", 6);
+                });
+            }
+
+            // --- "Không cập nhật" → grey reset ---
+            if (!silent && pseudo.includes("Không cập nhật")) {
+                highlightEdges.forEach(e => {
+                    const [a, b] = e.split("-");
+                    linkGroup.selectAll("line").filter(d => sameEdge(d.id, e))
+                        .transition().duration(200).attr("stroke", "#999").attr("stroke-width", 2);
+                    nodeGroup.selectAll("circle").filter(d => [a, b].includes(d.id.toLowerCase()))
+                        .transition().duration(200).attr("fill", "#999").attr("stroke", "#777");
+                });
+            }
+
+            // --- "Kết quả:" → final path reveal ---
+            if (pseudo.includes("Kết quả:")) {
+                linkGroup.selectAll("line").style("opacity", 0);
+                nodeGroup.selectAll("circle").style("opacity", 0);
+                weightGroup.selectAll("text").style("opacity", 0).attr("fill", "#ffffff");
+
+                Array.from(persistedBlueEdges).forEach((eid, i) => {
+                    setTimeout(() => {
+                        linkGroup.selectAll("line").filter(d => sameEdge(d.id, eid))
+                            .transition().duration(300).style("opacity", 1).attr("stroke", "#1565c0").attr("stroke-width", 4);
+                        weightGroup.selectAll("text").filter(d => sameEdge(d.id, eid))
+                            .transition().duration(300).style("opacity", 1).attr("fill", "#0d47a1");
+                    }, i * 150);
+                });
+                Array.from(persistedBlueNodes).forEach((nid, i) => {
+                    setTimeout(() => {
+                        nodeGroup.selectAll("circle").filter(d => d.id.toLowerCase() === nid)
+                            .transition().duration(300).style("opacity", 1).attr("fill", "#1976d2").attr("stroke", "#0d47a1").attr("stroke-width", 4);
+                    }, i * 150);
+                });
+            }
+
+            // --- Generic: any COLOR_NODE action ---
+            if (!silent && cur.action === "COLOR_NODE" && cur.color) {
+                highlightNodes.forEach(n => {
+                    nodeGroup.selectAll("circle").filter(d => d.id.toLowerCase() === n.toLowerCase())
+                        .transition().duration(300).attr("fill", cur.color).attr("stroke", d3.color(cur.color).darker(0.8) + "").attr("stroke-width", 6);
+                });
+            }
+
+            // --- Generic: any COLOR_EDGE action ---
+            if (!silent && cur.action === "COLOR_EDGE" && cur.color) {
+                highlightEdges.forEach(e => {
+                    linkGroup.selectAll("line").filter(d => sameEdge(d.id, e))
+                        .transition().duration(300).attr("stroke", cur.color).attr("stroke-width", 4);
+                });
+            }
+
+            // --- Generic: PERSIST_NODE (blue persist, e.g. BFS visited / MST node) ---
+            if (cur.action === "PERSIST_NODE") {
+                highlightNodes.forEach(n => {
+                    const nid = n.toLowerCase();
+                    persistedBlueNodes.add(nid);
+                    nodeGroup.selectAll("circle").filter(d => d.id.toLowerCase() === nid)
+                        .transition().duration(400).attr("fill", "#1976d2").attr("stroke", "#0d47a1").attr("stroke-width", 6);
+                });
+            }
+
+            // --- Generic: PERSIST_EDGE (blue persist, e.g. MST edge) ---
+            if (cur.action === "PERSIST_EDGE") {
+                highlightEdges.forEach(e => {
+                    const eid = e.toLowerCase();
+                    const [u, v] = eid.split("-");
+                    persistedBlueEdges.add(eid);
+                    persistedBlueEdges.add(`${v}-${u}`);
+                    linkGroup.selectAll("line").filter(d => sameEdge(d.id, eid))
+                        .transition().duration(400).attr("stroke", "#1565c0").attr("stroke-width", 4);
+                });
+            }
+
+            // --- Generic: RESET_TEMP  (grey out non-persisted) ---
+            if (!silent && cur.action === "RESET_TEMP") {
+                linkGroup.selectAll("line")
+                    .filter(d => !persistedBlueEdges.has(d.id.toLowerCase()) && !persistedBlueEdges.has(d.id.split("-").reverse().join("-")))
+                    .transition().duration(250).attr("stroke", "#999").attr("stroke-width", 2);
+                nodeGroup.selectAll("circle")
+                    .filter(d => !persistedBlueNodes.has(d.id.toLowerCase()))
+                    .transition().duration(250).attr("fill", "black").attr("stroke", "#E6BE8A").attr("stroke-width", 4);
+            }
+
+            updateStateDisplay(cur);
+            highlightPseudocode(cur);
+            renderStepsList();
+
+            // auto-scroll active step into view
+            setTimeout(() => {
+                const container = document.getElementById("dynamic-steps-area");
+                const active = container?.querySelector(".step-entry.active");
+                if (container && active) {
+                    const pr = container.getBoundingClientRect();
+                    const cr = active.getBoundingClientRect();
+                    if (cr.top < pr.top || cr.bottom > pr.bottom)
+                        container.scrollTo({ top: active.offsetTop - container.offsetTop - container.clientHeight / 2, behavior: "smooth" });
+                }
+            }, 100);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 12. STATE DISPLAY + PSEUDOCODE HIGHLIGHT
+        // ─────────────────────────────────────────────────────────────────────────────
+        function colorizeStateText(text) {
+            if (!text) return "";
+            return text.replace(/([a-zA-Z0-9]+)\s*:\s*([^\s,}]+)/g,
+                (m, node, value) => `<span class="state-node" data-node="${node.toLowerCase()}">${node}:${value}</span>`);
+        }
+
+        function updateStateDisplay(step) {
+            if (!step) return;
+            document.getElementById("stateT").innerHTML = "Close = " + colorizeStateText(step.StateT || "{}");
+            document.getElementById("stateQ").innerHTML = "Open  = " + colorizeStateText(step.StateQ || "{}");
+            document.getElementById("stateH").innerHTML = "H     = " + colorizeStateText(step.StateH || "[]");
+            document.getElementById("dist-state").innerHTML = "Dist  = " + colorizeStateText(step.StateDist || "{}");
+            document.getElementById("pre-state").innerHTML = "Pre   = " + colorizeStateText(step.StatePre || "{}");
+            syncStateColors();
+        }
+
+        function syncStateColors() {
+            document.querySelectorAll(".state-node").forEach(el => {
+                const node = d3.select(`#node-${el.dataset.node}`);
+                let color = "#9ca3af";
+                if (!node.empty()) {
+                    const fill = node.attr("fill");
+                    if (fill && fill !== "#000" && fill !== "black") color = fill;
+                }
+                el.style.color = color;
+                el.style.fontWeight = "bold";
+            });
+        }
+
+        // Map step.Pseudo → pseudocode panel key
+        const STEP_TO_PSEUDO = [
+            { match: "Close := {}", key: "init-close" },
+            { match: "Prev[t] := None", key: "init-dist" },
+            { match: "] = 0", key: "init-start" },
+            { match: "Open := ∅", key: "init-open" },
+            { match: "t := get(min(Dist", key: "pick-min" },
+            { match: "Append(Close", key: "add-close" },
+            { match: "thêm vào Open", key: "for" },
+            { match: "Xét đỉnh", key: "if1" },
+            { match: "= min(", key: "if12" },
+            { match: "Prev[", key: "if13" },
+            { match: "Append(Open", key: "if11" },
+            // BFS/DFS
+            { match: "Queue Q", key: "init" },
+            { match: "Stack S", key: "init" },
+            { match: "Visited", key: "init-visit" },
+            { match: "dequeue", key: "dequeue" },
+            { match: "pop(S", key: "pop" },
+            { match: "enqueue", key: "enqueue" },
+            { match: "push(S", key: "push" },
+            { match: "đánh dấu", key: "mark" },
+            { match: "chưa được thăm", key: "if-visit" },
+            { match: "chưa thăm", key: "if-visit" },
+            // Prim / Kruskal
+            { match: "MST = {", key: "init" },
+            { match: "EdgeSet", key: "init-edge" },
+            { match: "Union-Find", key: "init-uf" },
+            { match: "sắp xếp", key: "init" },
+            { match: "Union(", key: "union" },
+            { match: "thêm vào MST", key: "add-edge" },
+            { match: "chưa thuộc MST", key: "if-not" },
+            { match: "thuộc tập khác", key: "if-cycle" },
+        ];
+
+        function highlightPseudocode(step) {
+            document.querySelectorAll("#pseudocode-lines span").forEach(s => s.classList.remove("active"));
+            if (!step || !step.Pseudo) return;
+            // try highlightLine first (direct key match)
+            if (step.highlightLine) {
+                const el = document.querySelector(`#pseudocode-lines span[data-pc="${step.highlightLine}"]`);
+                if (el) { el.classList.add("active"); return; }
+            }
+            // fallback: text match
+            const rule = STEP_TO_PSEUDO.find(r => step.Pseudo.includes(r.match));
+            if (rule) {
+                const el = document.querySelector(`#pseudocode-lines span[data-pc="${rule.key}"]`);
+                if (el) el.classList.add("active");
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 13. STEPS LIST (right panel)
+        // ─────────────────────────────────────────────────────────────────────────────
+        function renderStepsList() {
+            const container = document.getElementById("dynamic-steps-area");
+            if (!container) return;
+            container.innerHTML = "";
+            if (!serverSteps || serverSteps.length === 0) return;
+
+            const curStep = serverSteps[currentStepIndex] || serverSteps[0];
+            const currentMain = (curStep.Step || "1").split(".")[0];
+
+            const titleDiv = document.createElement("div");
+            titleDiv.className = "step-title";
+            titleDiv.innerText = currentMain === "1" ? "BƯỚC 1: KHỞI TẠO" : `BƯỚC ${currentMain}`;
+            container.appendChild(titleDiv);
+
+            const groupSteps = serverSteps.filter(s => (s.Step || "").startsWith(currentMain + ".") || s.Step === currentMain);
+            let displaySteps = groupSteps;
+            if (parseInt(currentMain) > 1) {
+                const indexInGroup = groupSteps.findIndex(s => s === curStep);
+                const start = Math.floor(indexInGroup / 5) * 5;
+                displaySteps = groupSteps.slice(start, start + 5);
+            }
+
+            displaySteps.forEach(s => {
+                const div = document.createElement("div");
+                div.className = "step-entry";
+                if (s === curStep) div.classList.add("active");
+                div.innerText = `Step ${s.Step}: ${s.Pseudo}`;
+                div.onclick = () => { pause(); goToStep(serverSteps.indexOf(s)); };
+                container.appendChild(div);
+            });
+        }
+
+        function goToStep(index) {
+            if (!serverSteps || serverSteps.length === 0) return;
+            currentStepIndex = Math.max(0, Math.min(index, serverSteps.length - 1));
+            resetStyles();
+            persistedBlueEdges.clear();
+            persistedBlueNodes.clear();
+            // replay silently up to currentStepIndex-1, then apply current visually
+            for (let i = 0; i < currentStepIndex; i++) applyStepVisuals(i, true);
+            applyStepVisuals(currentStepIndex);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 14. PLAY / PREV / NEXT
+        // ─────────────────────────────────────────────────────────────────────────────
+        async function play() {
+            if (running) return;
+            if (!serverSteps || serverSteps.length === 0) {
+                await runAlgorithm();
+                return;
+            }
+            if (currentStepIndex >= serverSteps.length - 1) {
+                currentStepIndex = 0;
+                resetStyles();
+                persistedBlueEdges.clear();
+                persistedBlueNodes.clear();
+            }
+            running = true;
+            speechSynthesis.cancel();
+            await applyStepVisuals(currentStepIndex);
+            if (voiceEnabled) speakCurrentStep(() => stepNextLoop());
+            else stepNextLoop();
+        }
+
+        function prevStep() {
+            if (!serverSteps || currentStepIndex <= 0) return;
+            speechSynthesis.cancel();
+            currentStepIndex--;
+            resetStyles();
+            persistedBlueEdges.clear();
+            persistedBlueNodes.clear();
+            for (let i = 0; i < currentStepIndex; i++) applyStepVisuals(i, true);
+            applyStepVisuals(currentStepIndex);
+            renderStepsList();
+        }
+
+        function nextStep() {
+            if (!serverSteps || serverSteps.length === 0) return;
+            speechSynthesis.cancel();
+            if (stepTimer) { clearTimeout(stepTimer); stepTimer = null; }
+            currentStepIndex = Math.min(serverSteps.length - 1, currentStepIndex + 1);
+            applyStepVisuals(currentStepIndex);
+            renderStepsList();
+            if (voiceEnabled) speakCurrentStep(() => { if (running) stepNextLoop(); });
+            else if (running) {
+                const speedVal = +document.getElementById("speed")?.value || 3;
+                stepTimer = setTimeout(() => { if (running) stepNextLoop(); }, Math.max(500, Math.round(5000 / speedVal)));
+            }
+        }
+
+        async function stepNextLoop() {
+            if (!running) return;
+            const speedVal = +document.getElementById("speed")?.value || 3;
+            const duration = Math.max(500, Math.round(5000 / speedVal));
+
+            if (currentStepIndex >= serverSteps.length - 1) {
+                running = false;
+                return;
+            }
+            currentStepIndex++;
+            await applyStepVisuals(currentStepIndex);
+
+            speakCurrentStep(() => {
+                if (!running) return;
+                stepTimer = setTimeout(() => { stepNextLoop(); }, duration);
+            });
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 15. VOICE
+        // ─────────────────────────────────────────────────────────────────────────────
+        function speakCurrentStep(onDone) {
+            if (!voiceEnabled) { onDone && onDone(); return; }
+            const step = serverSteps[currentStepIndex];
+            if (!step) { onDone && onDone(); return; }
+            speechSynthesis.cancel();
+            let voices = speechSynthesis.getVoices();
+            if (!voices.length) { setTimeout(() => speakCurrentStep(onDone), 100); return; }
+            const text = step.Explain || step.Pseudo;
+            const utter = new SpeechSynthesisUtterance(text);
+            const viVoice = voices.find(v => v.lang.startsWith("vi"));
+            utter.voice = viVoice || null;
+            utter.lang = viVoice ? "vi-VN" : "en-US";
+            utter.rate = 0.9;
+            utter.onend = () => { onDone && onDone(); };
+            speechSynthesis.speak(utter);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 16.  ██  CLAUDE API — ALGORITHM ENGINE  ██
+        //      This replaces your FastAPI backend entirely.
+        //      It sends the current graph + pseudocode to Claude and receives
+        //      serverSteps[] in the EXACT same format your backend returned.
+        // ─────────────────────────────────────────────────────────────────────────────
+        function buildPrompt(algo, pseudoLines, graphNodes, graphEdges, startNode, endNode) {
+            const pseudoText = pseudoLines.map(l => l.text).join("\n");
+            const nodesStr = graphNodes.map(n => n.id.toUpperCase()).join(", ");
+            const edgesStr = graphEdges.map(l => {
+                const { s, t } = getEndpoints(l);
+                return `(${s.toUpperCase()},${t.toUpperCase()},${l.weight})`;
+            }).join(", ");
+
+            return `You are an expert graph-algorithm animator.
+
+TASK: Simulate the algorithm step-by-step on the given graph and return ONLY a valid JSON array.
+
+ALGORITHM: ${algo.toUpperCase()}
+PSEUDOCODE:
+${pseudoText}
+
+GRAPH (undirected, weighted):
+  Nodes: ${nodesStr}
+  Edges: ${edgesStr}
+
+START node: ${startNode.toUpperCase()}
+${endNode ? `END node: ${endNode.toUpperCase()}` : ''}
+
+RULES:
+1. Execute the algorithm EXACTLY on this graph. Compute correct distances / visited order / MST edges.
+2. Return a JSON array of step objects. Each object has:
+   {
+     "Step": "<major>.<minor>",   // e.g. "1.1", "2.3"
+     "Pseudo": "<Vietnamese text describing this micro-step>",
+     "Explain": "<Vietnamese 1-sentence explanation for TTS>",
+     "highlightLine": "<key>",    // one of the pseudocode keys (init-close, pick-min, add-close, for, if1, if11, if12, if13, if2, if21, if22, if23, end-loop, init, init-visit, loop, dequeue, enqueue, pop, push, mark, if-visit, init-edge, if-not, add-node, add-edge, update, init-uf, pick, if-cycle, union)
+     "action": "<ACTION>",        // one of: INIT_ALGORITHM, COLOR_NODE, COLOR_EDGE, PERSIST_NODE, PERSIST_EDGE, RELAX_EDGE, RESET_TEMP, FINAL_PATH
+     "color": "<hex>",            // optional colour for COLOR_NODE / COLOR_EDGE
+     "Highlight": { "Nodes": ["a","b"], "Edges": ["a-b"] },
+     "StateT": "{ a:0 }",        // Close / visited set as string
+     "StateQ": "{ b:42, c:4 }",  // Open / queue / stack as string
+     "StateH": "[]",
+     "StateDist": "{ a:0, b:42, c:4, d:∞, e:∞, f:∞ }",
+     "StatePre": "{ a:null, b:a, c:a }"
+   }
+
+3. COLOUR conventions (use these hex values):
+   • Considering / in queue     → #ffc107 (yellow)
+   • Currently examining        → #e53935 (red)
+   • Distance updated / relaxed → #00e676 (green)
+   • Finalised / persisted      → #1976d2 (blue)
+
+4. For Dijkstra: include Append(Close, X) steps so blue-persist triggers.
+   Use "Xét các lân cận" and "Xét đỉnh X" and "Dist[" phrasing so existing highlight rules fire.
+   End with a step whose Pseudo contains "Kết quả:" listing the shortest path.
+
+5. For BFS/DFS: use "đánh dấu" (mark), "chưa thăm" (not visited). Persist visited nodes blue.
+   End with "Kết quả:" listing the traversal order.
+
+6. For Prim/Kruskal: persist MST edges and nodes blue. End with "Kết quả:" listing MST edges + total weight.
+
+7. State strings must update EVERY step to reflect the true algorithm state.
+
+8. Return ONLY the JSON array — no markdown fences, no explanation.`;
+        }
+
+        async function callClaudeAPI(prompt) {
+            const response = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 4000,
+                    messages: [{ role: "user", content: prompt }]
+                })
+            });
+            if (!response.ok) throw new Error("Claude API error: " + response.status);
+            const data = await response.json();
+            // extract text
+            const text = data.content.map(b => b.type === "text" ? b.text : "").join("\n").trim();
+            // strip possible markdown fences
+            const clean = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+            return JSON.parse(clean);
+        }
+
+        async function runAlgorithm() {
+            stopAnimation();
+            serverSteps = [];
+            currentStepIndex = -1;
+            renderStepsList();
+
+            const algo = document.getElementById("algo-select").value;
+            const startInput = normId(document.getElementById("startNodeInput").value);
+            const endInput = normId(document.getElementById("endNodeInput").value);
+
+            if (!startInput || !nodes.find(n => n.id === startInput)) {
+                showNotification("Vui lòng nhập đỉnh bắt đầu hợp lệ", "error");
+                return;
+            }
+
+            // show loading
+            document.getElementById("loading-overlay").classList.add("active");
+            document.getElementById("loading-text").textContent = `AI đang phân tích ${algo.toUpperCase()}…`;
+
+            try {
+                const pseudoLines = PSEUDOCODES[algo];
+                const prompt = buildPrompt(algo, pseudoLines, nodes, links, startInput, endInput);
+                const steps = await callClaudeAPI(prompt);
+
+                if (!Array.isArray(steps) || steps.length === 0) throw new Error("Rẹsponse rỗng");
+
+                serverSteps = steps;
+                currentStepIndex = 0;
+
+                // hide loading, show explanation panel
+                document.getElementById("loading-overlay").classList.remove("active");
+                document.body.classList.add("playing");
+
+                // auto-open explanation panel
+                const w = document.getElementById("explanation-wrapper");
+                const cw = document.getElementById("content-wrapper");
+                if (!w.classList.contains("show-steps")) {
+                    w.classList.add("show-steps");
+                    cw.classList.add("explain-open");
+                    document.querySelector("#eye h1").innerText = "🙈";
+                    document.querySelector("#eye h4").innerText = "Ẩn thuật giải";
+                }
+
+                renderStepsList();
+                resetStyles();
+                persistedBlueEdges.clear();
+                persistedBlueNodes.clear();
+
+                running = true;
+                document.getElementById("playPauseBtn").textContent = "⏸";
+                isPlaying = true;
+                await applyStepVisuals(0);
+                if (voiceEnabled) speakCurrentStep(() => stepNextLoop());
+                else stepNextLoop();
+
+            } catch (err) {
+                document.getElementById("loading-overlay").classList.remove("active");
+                console.error(err);
+                showNotification("Lỗi: " + (err.message || "Không thể gọi AI"), "error");
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────────
+        // 17.  INIT
+        // ─────────────────────────────────────────────────────────────────────────────
+        window.addEventListener("load", () => {
+            renderPseudocodePanel();
+            restart();
+            resetStyles();
+            d3.selectAll("circle").attr("r", 34);
+            d3.selectAll("line").style("opacity", 1);
+            d3.selectAll("text").style("opacity", 1);
+        });
+
+        // expose globals for inline HTML handlers
+        window.showCreate = showCreate;
+        window.addNode = addNode;
+        window.removeNode = removeNode;
+        window.addEdge = addEdge;
+        window.removeEdge = removeEdge;
+        window.resetGraph = resetGraph;
+        window.play = play;
+        window.pause = pause;
+        window.prevStep = prevStep;
+        window.nextStep = nextStep;
+        window.onAlgoChange = onAlgoChange;
+        window.runAlgorithm = runAlgorithm;
+        window.togglePlayPause = togglePlayPause;
+        window.toggleExplanation = toggleExplanation;
+        window.toggleMenu = toggleMenu;
+        window.backToEditMode = backToEditMode;
+        window.toggleVoice = toggleVoice;
+    </script>
+</body>
+
+</html>

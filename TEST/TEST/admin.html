@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Nhập Mã Giả Thuật Toán</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .admin-panel {
+            width: 100%;
+            max-width: 800px;
+            background: #111;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            color: #f9c74f;
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #00ff00;
+            /* Màu xanh terminal */
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #f9c74f;
+        }
+
+        textarea {
+            height: 300px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn-submit {
+            background: #f9c74f;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: #f9d478;
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-panel">
+        <h2>🛠 Admin: Algorithm Input</h2>
+        <p style="color: #bbb; margin-bottom: 25px;">Nhập thuật toán mới để AI phân tích và tạo hiệu ứng đồ thị.</p>
+
+        <div class="form-group">
+            <label>Tên Thuật Toán (Ví dụ: Dijkstra, A*, Bellman-Ford)</label>
+            <input type="text" id="algo-name" placeholder="Nhập tên thuật toán...">
+        </div>
+
+        <div class="form-group">
+            <label>Nội dung Mã Giả (Pseudocode)</label>
+            <textarea id="pseudocode"
+                placeholder="1. Khởi tạo...&#10;2. Lặp cho đến khi...&#10;   2.1 Chọn đỉnh u...&#10;   2.2 Với mỗi v kề u..."></textarea>
+            <p class="hint">Mẹo: Đánh số dòng rõ ràng giúp AI nhận diện bước nhảy (highlight) chính xác hơn.</p>
+        </div>
+
+        <button class="btn-submit" onclick="submitToAI()">▶ Gửi & Phân Tích Với AI</button>
+    </div>
+
+    <script>
+        async function submitToAI() {
+            const name = document.getElementById('algo-name').value;
+            const code = document.getElementById('pseudocode').value;
+
+            if (!name || !code) {
+                alert("Vui lòng nhập đầy đủ thông tin!");
+                return;
+            }
+
+            console.log("Đang gửi dữ liệu đến backend...", { name, code });
+            // Ở đây bạn sẽ gọi API analyzePseudocode(code, name) 
+            // tương tự như trong file App.js của bạn.
+            alert("Đã gửi! Kiểm tra tab Visualizer để xem kết quả.");
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>ALGO DRIVE — Vertical Quiz Racer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ═══ CANVAS ═══ -->
+    <canvas id="cvs"></canvas>
+
+    <!-- ═══ HUD PANEL (right of canvas) ═══ -->
+    <div id="hud" class="hidden">
+        <div class="hud-block">
+            <div class="hud-lbl">SCORE</div>
+            <div id="h-score">0</div>
+        </div>
+        <div class="hud-sep"></div>
+        <div class="hud-block">
+            <div class="hud-lbl">LEVEL</div>
+            <div id="h-level">1</div>
+            <div id="lvbar-bg">
+                <div id="lvbar"></div>
+            </div>
+        </div>
+        <div class="hud-sep"></div>
+        <div class="hud-block">
+            <div class="hud-lbl">LIVES</div>
+            <div id="h-hearts">
+                <span class="heart" id="hp1">♥</span>
+                <span class="heart" id="hp2">♥</span>
+                <span class="heart" id="hp3">♥</span>
+            </div>
+        </div>
+        <div class="hud-sep"></div>
+        <div class="hud-block">
+            <div class="hud-lbl">BEST</div>
+            <div id="h-best">0</div>
+        </div>
+    </div>
+
+    <!-- ═══ FLASH OVERLAY ═══ -->
+    <div id="flash"></div>
+
+    <!-- ═══ SCREEN: MENU ═══ -->
+    <div id="s-menu" class="screen on">
+        <div class="grid-bg"></div>
+        <div class="vignette"></div>
+        <div class="menu-content">
+            <div class="logo-eyebrow">ALGORITHM</div>
+            <h1 class="logo-main">ALGO<span class="logo-acc">DRIVE</span></h1>
+            <div class="logo-sub">VERTICAL QUIZ RACER</div>
+            <div id="menu-hs">BEST SCORE: <span id="menu-hs-val">0</span></div>
+            <button id="btn-start" class="btn-primary"><span>▶ START GAME</span></button>
+            <p class="hint">← → hoặc A D — đổi làn &nbsp;|&nbsp; Né xe để ghi điểm</p>
+        </div>
+    </div>
+
+    <!-- ═══ SCREEN: COUNTDOWN ═══ -->
+    <div id="s-cd" class="screen off">
+        <div id="cd-num">3</div>
+    </div>
+
+    <!-- ═══ SCREEN: LEVEL UP ═══ -->
+    <div id="s-lu" class="screen off no-ptr">
+        <div id="lu-inner">
+            <div id="lu-tag">LEVEL UP</div>
+            <div id="lu-num">2</div>
+            <div id="lu-hint">SPEED ↑ SPAWN ↑</div>
+        </div>
+    </div>
+
+    <!-- ═══ SCREEN: GAME OVER ═══ -->
+    <div id="s-go" class="screen off">
+        <div id="go-card">
+            <div id="go-title">GAME OVER</div>
+            <div id="go-stats">
+                <div class="stat-box"><span class="stat-lbl">SCORE</span><span id="go-score">0</span></div>
+                <div class="stat-box"><span class="stat-lbl">LEVEL</span><span id="go-lv">1</span></div>
+                <div class="stat-box"><span class="stat-lbl">BEST</span><span id="go-best">0</span></div>
+            </div>
+            <div id="go-rec" class="hidden">🏆 NEW RECORD!</div>
+            <div class="go-btns">
+                <button id="btn-retry" class="btn-primary sm"><span>↺ PLAY AGAIN</span></button>
+                <button id="btn-menu" class="btn-ghost">⌂ MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ QUIZ OVERLAY ═══ -->
+    <div id="quiz-ov" class="hidden">
+        <div id="quiz-box">
+            <div id="quiz-meta">
+                <span id="qz-cat">GRAPH</span>
+                <span id="qz-diff">LV1</span>
+            </div>
+            <div id="qz-question"></div>
+            <div id="qz-options"></div>
+            <div id="qz-result" class="hidden">
+                <span id="qz-result-txt"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

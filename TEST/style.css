@@ -1,0 +1,1062 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+  background: #fff;
+}
+
+
+
+#explanation-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 0;
+  /* Thu hẹp về 0 */
+  opacity: 0;
+  /* Mờ đi */
+  overflow: hidden;
+  /* Không cho hiện nội dung khi đang thu */
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.5s ease;
+}
+
+/* ===== CONTROL PANEL ANIMATION ===== */
+#controls {
+  overflow: hidden;
+  transition: width 0.7s ease-in-out, opacity 0.7s ease-in-out;
+  will-change: transform, opacity;
+}
+
+body.playing #controls {
+  transform: translateX(-260px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+
+#controls {
+  width: 250px;
+  background: #000;
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  margin-top: auto;
+  align-self: center;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#controls button {
+  width: 100%;
+  /* 👈 QUAN TRỌNG */
+  background: #3b3b3b;
+  font-size: 15px;
+  border: none;
+  padding: 12px 0;
+  color: white;
+  cursor: pointer;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+
+#controls button:hover {
+  background: #f9c74f;
+  color: #000;
+  transform: translateX(3px);
+}
+
+
+.input-group {
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group input {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* ===== JSON Upload & Step Card Styles ===== */
+.input-vertical-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.input-field {
+  margin: 8px 0;
+}
+
+.input-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ddd;
+}
+
+.input-field input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  border: 2px dashed #f9c74f;
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: #fff;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.3s;
+}
+
+.input-field input[type="file"]:hover {
+  background: #3b3b3b;
+  border-color: #ffd60a;
+}
+
+.input-field input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #2a2a2a;
+  color: #fff;
+  font-size: 13px;
+}
+
+#dynamic-steps-area {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.step-card {
+  background: #2a2a2a;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 4px solid #555;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.step-card:hover {
+  border-left-color: #f9c74f;
+  background: #353535;
+  transform: translateX(3px);
+}
+
+.step-card.active {
+  background: #1a3a52;
+  border-left-color: #00e676;
+  box-shadow: 0 2px 8px rgba(0, 230, 118, 0.3);
+}
+
+.step-card .step-number {
+  font-weight: 700;
+  color: #f9c74f;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.step-card .step-explain {
+  color: #ddd;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+#pseudocode-content {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #ddd;
+  padding: 10px;
+  background: #1a1a1a;
+  border-radius: 6px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.pseudo-line {
+  display: block;
+  padding: 3px 6px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  margin: 1px 0;
+}
+
+.pseudo-line.highlight {
+  background: #1a3a52;
+  border-left: 4px solid #00e676;
+  padding-left: 10px;
+  font-weight: 600;
+  color: #fff;
+}
+
+
+
+/* ===== Floating Menu Button ===== */
+#floating-menu-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+
+  background: #f9c74f;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+
+  opacity: 0;
+  transform: translateX(-20px);
+  pointer-events: none;
+
+  transition: all 0.4s ease;
+}
+
+/* Khi play → hiện menu nổi */
+body.playing #floating-menu-btn {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  /* Thêm transition cực kỳ quan trọng ở đây */
+  transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+}
+
+
+
+#content-wrapper.explain #main {
+  max-width: none;
+  width: calc(100vw - 1000px);
+}
+
+
+#explanation-wrapper {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: width 0.6s ease-in-out, opacity 0.6s ease-in-out;
+}
+
+/* Chỉ hiện khi bấm 👀 */
+body.show-explain #explanation-wrapper {
+  width: 850px;
+  opacity: 1;
+}
+
+/* Main co lại khi explanation mở */
+body.show-explain #main {
+  width: calc(100vw - 850px);
+}
+
+
+#canvas {
+  width: 98%;
+  height: 80%;
+  flex: 1;
+  margin: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+}
+
+
+#graph {
+  width: 90%;
+  height: 100%;
+}
+
+
+#footer {
+  background: #0e0e0e;
+  color: #fff;
+  width: 100%;
+  padding: 40px 0px 40px 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  font-size: 1em;
+}
+
+#footer button {
+
+  background: #f9c74f;
+  border: none;
+  padding: 15px 21px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: bold;
+}
+
+
+#steps {
+  width: 350px;
+  min-width: 0px;
+  background: #000;
+  padding: 20px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+#steps h3 {
+  margin-top: 0;
+}
+
+.state-node {
+  color: #9ca3af;
+  /* màu ban đầu */
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.25s, background 0.25s;
+}
+
+
+#dist-state,
+#pre-state {
+  color: #f9c74f;
+}
+
+#t-state,
+#q-state,
+#h-state {
+  color: #66ff66;
+}
+
+#steps .step-group-title {
+  font-size: 1em;
+  font-weight: bold;
+  color: #f9c74f;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #444;
+}
+
+#steps .step {
+  background: #333;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+#steps .step.active {
+  background: #f9c74f;
+  /* Màu nền vàng đậm */
+  color: #000;
+  /* Màu chữ đen */
+  font-weight: bold;
+  box-shadow: 0 0 15px 5px rgba(249, 199, 79, 1);
+  transform: scale(1.03);
+  /* Phóng to rõ rệt hơn */
+}
+
+/* Step chưa active thì mờ hơn */
+#steps .step {
+  opacity: 0.6;
+  transition: all 0.25s ease;
+}
+
+#steps .step.active {
+  opacity: 1;
+}
+
+/* Đồng bộ màu text bên trong */
+#steps .step.active .step-text,
+#steps .step.active .step-title,
+#steps .step.active .step-preview {
+  color: #000 !important;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: bold;
+  color: #888;
+}
+
+.node-label-dist {
+  font-size: 12px;
+  font-weight: bold;
+  color: #888;/
+}
+
+.node-label-pre {
+  font-size: 12px;
+  font-weight: bold;
+  color: #888;
+}
+
+
+#notification {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 0.5s;
+  z-index: 1000;
+}
+
+#notification.show {
+  opacity: 1;
+}
+
+#notification.success {
+  background-color: #4caf50;
+}
+
+#notification.error {
+  background-color: #f44336;
+}
+
+.step-detail-container {
+  width: 98%;
+  padding: 10px;
+  border-top: 1px solid #333;
+  margin: 10px auto;
+  background: #1c1c1c;
+  color: #fff;
+  border-radius: 8px;
+
+}
+
+.step-detail-container h3 {
+  color: #f9c74f;
+  margin-top: 0;
+}
+
+h3 {
+  color: #ff9900;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+}
+
+pre span {
+  display: block;
+  /* mỗi span trên một dòng */
+  line-height: 0;
+  /* khoảng cách giữa các dòng */
+  margin: 0;
+  /* loại bỏ margin thừa */
+  white-space: pre;
+  /* giữ khoảng trắng và xuống dòng nguyên bản */
+}
+
+
+
+
+.step-detail-container .explain {
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+#state-display {
+  display: none;
+  background: #1a1a1a;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+  border: 1px solid #535252;
+}
+
+#state-display h3 {
+  color: #FFD700;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+#state-display .state-item {
+  font-size: 15px;
+  margin-bottom: 5px;
+  font-family: 'Courier New', monospace;
+  word-wrap: break-word;
+}
+
+.state-item {
+  color: #9ca3af;
+  /* xám nhạt – mặc định */
+  font-family: "Courier New", monospace;
+}
+
+.state-node {
+  color: inherit;
+  /* 👈 kế thừa màu xám */
+}
+
+
+
+#state-display #dist-state,
+#state-display #pre-state {
+  color: #f9c74f;
+  font-weight: bold;
+}
+
+
+#state-display #stateT {
+  color: #1565c0;
+  Font-weight: bold;
+}
+
+#state-display #stateH {
+  color: #ffc107;
+  Font-weight: bold;
+}
+
+#state-display #stateQ {
+  color: #00e676;
+  Font-weight: bold;
+}
+
+
+
+#steps .step {
+  background: #333;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#steps .step:hover {
+  background: #444;
+}
+
+
+#steps .step.active .step-text {
+  color: #1c1c1c;
+}
+
+#steps .state-preview {
+  font-size: 1em;
+  color: #aaa;
+  display: flex;
+  flex-direction: column;
+  padding-left: 5px;
+  border-left: 2px solid #555;
+  margin-top: 5px;
+}
+
+#steps .step.active .state-preview {
+  border-left-color: #1c1c1c;
+}
+
+#steps .state-preview .preview-t {
+  color: #66ff66;
+}
+
+#steps .state-preview .preview-dist {
+  color: #a3e635;
+}
+
+
+/* .link-text {
+    fill: #000 !important;  
+    font-weight: bold;
+}
+
+.link-group text {
+    fill: #000 !important;
+} */
+
+.link-text {
+  fill: #888 !important;
+  font-weight: bold;
+}
+
+
+.link-group text {
+  fill: #888 !important;
+  /* Đổi từ #000 sang XÁM cho trọng số SVG */
+}
+
+#color-legend {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  width: 190px;
+  padding: 10px 12px;
+
+  border-radius: 8px;
+  border: 1px solid #444;
+
+  font-size: 13px;
+  pointer-events: none;
+  /* không chặn kéo node */
+}
+
+
+
+#eye {
+  position: absolute;
+  font-size: 18px;
+  color: #000;
+  top: 55px;
+  right: 12px;
+  z-index: 1001;
+  background: #f9c74f;
+  border: 1px solid #000;
+  padding: 0px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+body.playing #eye {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Hover đổi màu nút Eye */
+#eye:hover {
+  background: #A2D2FF !important;
+  border: 1px solid #000;
+}
+
+#eye:hover h4,
+#eye:hover h1 {
+  color: #000 !important;
+}
+
+
+
+#explanation-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 0;
+  /* Thu hẹp về 0 để ẩn */
+  opacity: 0;
+  /* Mờ hẳn đi */
+  overflow: hidden;
+  /* Không cho nội dung tràn ra khi đang ẩn */
+  background: #000;
+  /* Hiệu ứng trượt mượt mà trong 0.7 giây */
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+}
+
+/* --- KHI BẤM EYE (THÊM CLASS NÀY QUA JS) --- */
+#explanation-wrapper.show-steps {
+  width: 850px;
+  /* Bung rộng ra đúng kích thước */
+  opacity: 1;
+  /* Hiện rõ lên */
+}
+
+/* Co giãn phần Canvas để nhường chỗ cho bảng Step */
+#content-wrapper {
+  display: flex;
+  width: 100vw;
+  transition: all 0.7s ease-in-out;
+}
+
+#content-wrapper.explain-open #main {
+  width: calc(100vw - 850px);
+  /* Canvas tự động co lại mượt mà */
+}
+
+
+/* Hiệu ứng HOVER đổi màu nút eye */
+#eye:hover {
+  background: #f9c74f;
+  /* Đổi sang màu vàng khi lia chuột vào */
+  border-color: #f9c74f;
+}
+
+#eye:hover h4 {
+  color: #000;
+  /* Đổi màu chữ sang đen cho dễ đọc trên nền vàng */
+}
+
+#eye span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#eye h1,
+#eye h4 {
+  margin: 0;
+}
+
+/* Đảm bảo bảng giải thích không tự động hiện ra khi có class explain */
+/* Chúng ta sẽ dùng một class mới để kiểm soát việc này */
+#explanation-wrapper.visible {
+  width: 850px;
+  opacity: 1;
+}
+
+
+
+#color-legend h4 {
+  margin: 0 0 8px;
+  color: #000;
+  font-size: 15px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.legend-color.yellow {
+  background: #ffc107;
+}
+
+.legend-color.red {
+  background: #e53935;
+}
+
+.legend-color.green {
+  background: #00e676;
+}
+
+.legend-color.blue {
+  background: #1976d2;
+}
+
+#pseudocode-panel {
+  width: 500px;
+  min-width: 350px;
+  font-size: 1em;
+  background: #111;
+  color: #ffffff;
+  padding: 15px;
+  flex-shrink: 0;
+  font-family: "Courier New", monospace;
+}
+
+#pseudocode-panel span {
+  display: block;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.25s;
+}
+
+#pseudocode-panel span.active {
+  background: #f9c74f;
+  color: #000;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(249, 199, 79, 0.6);
+  padding: 15px;
+}
+
+
+.step-entry {
+  margin: 10px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  cursor: pointer;
+  color: #ffffff;
+  opacity: 0.9;
+  transition: all 0.25s ease;
+}
+
+.step-entry.active {
+  background: #f9c74f;
+  color: #000000;
+  font-weight: bold;
+  opacity: 1;
+  box-shadow: 0 0 10px rgba(249, 199, 79, 0.8);
+  transform: scale(1.01);
+}
+
+#steps .step-entry.active {
+  color: #000 !important;
+  padding: 15px;
+}
+
+
+.step-entry {
+  font-size: 16px;
+  /* 👈 size chuẩn */
+  line-height: 1.4;
+}
+
+/* STEP active – KHÔNG đổi size */
+.step-entry.active {
+  font-size: 18px;
+}
+
+/* PSEUDOCODE */
+#pseudocode-panel {
+  font-family: "Courier New", Consolas, monospace;
+  font-size: 15px;
+}
+
+/* Mỗi dòng pseudocode */
+#pseudocode-panel span {
+  font-size: 15px;
+}
+
+body.playing #main {
+  width: 100vw;
+}
+
+body.playing #canvas {
+  width: 100%;
+  margin-left: 0;
+}
+
+
+body.playing #controls>button {
+  display: none;
+}
+
+
+
+
+
+body.playing #controls button {
+  background: #222;
+}
+
+
+.menu-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+#normal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  /* khoảng cách đều */
+}
+
+
+body.playing #normal-buttons {
+  display: none;
+  /* Ẩn 3 nút */
+}
+
+body.playing .menu-container {
+  display: none;
+}
+
+
+/* Menu nổi trên canvas */
+body.playing #controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: auto;
+  background: transparent;
+  z-index: 1000;
+}
+
+
+.menu-btn {
+  width: 100%;
+  padding: 10px !important;
+  background-color: #3b3b3b;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.menu-dropdown.show {
+  display: flex;
+}
+
+/* Container giữ vị trí của menu */
+#floating-menu-container {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  /* Đồng bộ hiệu ứng hiện ra khi body.playing */
+  opacity: 0;
+  transform: translateX(-20px);
+  pointer-events: none;
+  transition: all 0.4s ease;
+}
+
+body.playing #floating-menu-container {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+
+/* Tùy chỉnh nút menu chính (giữ nguyên style cũ của bạn) */
+#floating-menu-btn {
+  top: 40px;
+  background: #f9c74f;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 15px 14px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #444;
+  width: 180px;
+}
+
+
+/* Tùy chỉnh nút menu chính (giữ nguyên style cũ của bạn) */
+#floating-menu-btn:hover {
+  background: #A2D2FF !important;
+  color: #000 !important;
+}
+
+#floating-menu-dropdown {
+  position: absolute;
+  /* Thay đổi từ top: 100px */
+  top: 50px;
+  left: 0;
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.9);
+
+  padding: 10px;
+  border-radius: 8px;
+  width: 130px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+#floating-menu-dropdown.show {
+  display: flex;
+}
+
+#floating-menu-dropdown button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px !important;
+  font-size: 12px;
+  background: #444 !important;
+  border-radius: 4px;
+}
+
+#floating-menu-dropdown button:hover {
+  background: #f9c74f !important;
+  color: #000 !important;
+}
+
+
+.menu-dropdown {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding-left: 15px;
+}
+
+.menu-dropdown button {
+  font-size: 13px !important;
+  padding: 8px 0 !important;
+  background: #4a4a4a !important;
+}
+
+.menu-dropdown button:hover {
+  background: #555;
+}
+
+
+.input-vertical-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-field label {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+#startNodeInput,
+#endNodeInput {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #fff;
+  padding: 12px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+
+#startNodeInput:focus,
+#endNodeInput:focus {
+  border-color: #f9c74f;
+  background: #222;
+  outline: none;
+  box-shadow: 0 0 5px rgba(249, 199, 79, 0.2);
+}

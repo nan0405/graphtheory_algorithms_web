@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Dijkstra Algorithm Visualization</title>
+    <audio id="audio" src="../deijjtra/dijkstra_explain.mp3"></audio>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./prim.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+</head>
+
+<body>
+    <div id="controls">
+
+        <div id="normal-buttons">
+            <div class="input-vertical-stack">
+                <div class="input-field">
+                    <label>Start Node</label>
+                    <input type="text" id="startNodeInput" placeholder="VD: A" maxlength="5" />
+                </div>
+            </div>
+            <button onclick="showCreate()">Create Graph</button>
+            <div id="createForm" style="display: none">
+                <div class="input-group">
+                    <label>Node Name</label>
+                    <input type="text" id="nodeName" />
+                    <button onclick="addNode()">Add Node</button>
+                    <button onclick="removeNode()">Remove Node</button>
+                </div>
+                <div class="input-group">
+                    <label>From - To - Value</label>
+                    <input type="text" id="fromNode" placeholder="From" />
+                    <input type="text" id="toNode" placeholder="To" />
+                    <input type="number" id="edgeValue" placeholder="Value" />
+                    <button onclick="addEdge()">Add Edge</button>
+                    <button onclick="removeEdge()">Remove Edge</button>
+                </div>
+            </div>
+            <button onclick="resetGraph()">Reset</button>
+            <button onclick="randomGraph()">Random</button>
+        </div>
+    </div>
+
+
+
+
+    <div id="floating-menu-container">
+        <button id="floating-menu-btn" onclick="toggleMenu()">Chỉnh sửa đồ thị</button>
+        <div id="floating-menu-dropdown" class="dropdown-content">
+            <button onclick="backToEditMode(); showCreate()">Create Graph</button>
+            <button onclick="backToEditMode(); resetGraph()">Reset</button>
+            <button onclick="backToEditMode(); randomGraph()">Random</button>
+        </div>
+    </div>
+    </div>
+
+    <div id="eye" onclick="toggleExplanation()">
+        <span>
+            <h1>👀</h1>
+            <h4> Hiện thuật giải</h4>
+        </span>
+    </div>
+
+
+    <div id="content-wrapper">
+        <div id="main">
+            <div id="canvas">
+                <svg id="graph" viewBox="0 0 600 500" preserveAspectRatio="xMidYMid meet"></svg>
+                <div id="color-legend">
+                    <h4>Ghi chú màu</h4>
+                    <div class="legend-item">
+                        <span class="legend-color yellow"></span> Chờ xét
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color red"></span> Đang xét
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color green"></span> Cập nhật Dist
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color blue"></span> Đỉnh đã chốt
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div id="footer">
+                <button onclick="prevStep()">⏮</button>
+                <button id="playPauseBtn" onclick="togglePlayPause()">▶</button>
+                <button onclick="nextStep()">⏭</button>
+                <button id="toggleVoice" onclick="toggleVoice()">🔊 Voice: ON</button>
+                <label>Speed: <input type="range" min="1" max="5" value="3" id="speed" /></label>
+                <audio id="audio" src="./dijkstra_explain.mp3"></audio>
+            </div>
+        </div>
+
+
+        <div id="explanation-wrapper">
+            <div id="steps">
+                <h3>STEP – PRIM</h3>
+                <div id="dynamic-steps-area"></div>
+                <div id="state-display">
+                    <h3>Trạng thái</h3>
+
+                    <div id="stateT" class="state-item">T = {}</div>
+                    <div id="stateQ" class="state-item">Q = {}</div>
+                    <div id="stateH" class="state-item">H = {}</div>
+                    <div id="dist-state" class="state-item">Dist = {}</div>
+                    <div id="pre-state" class="state-item">Pre = {}</div>
+                </div>
+            </div>
+
+
+            <div id="pseudocode-panel">
+                <h3>PSEUDOCODE – PRIM</h3>
+                <pre>
+                <span data-pc="init">Bước 1: Khởi tạo</span>
+                <span data-pc="init-dist">1.1 Dist[v] = ∞, Pre[v] = None với mọi v</span>
+                <span data-pc="init-start">1.2 Dist[start] = 0, Q = {start}</span>
+                <span data-pc="loop">Bước 2: Vòng lặp (Q không rỗng):</span>
+                <span data-pc="pick-min">  2.1. Chọn t ∈ Q có Dist[t] nhỏ nhất</span>
+                <span data-pc="add-tree">  2.2. Thêm t vào cây khung (T)</span>
+                <span data-pc="for">  2.3. Xét mỗi đỉnh v kề với t và v ∉ T:</span>
+                <span data-pc="if-update">    2.3.1. Nếu w(t, v) < Dist[v]:</span>
+                <span data-pc="update-dist">       • Dist[v] = w(t, v)</span>
+                <span data-pc="update-pre">       • Pre[v] = t, thêm v vào Q</span>
+                <span data-pc="end">Bước 3: Kết thúc khi Q rỗng.</span>
+            </pre>
+            </div>
+
+
+
+        </div>
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <div id="notification"></div>
+    <script src="./prim.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 ML Algorithm Visualizer - Đồ án Machine Learning</title>
+    <link rel="stylesheet" href="./style_ml.css">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- ML Analysis Dashboard -->
+    <div id="ml-dashboard" class="ml-dashboard hidden">
+        <div class="ml-header">
+            <h2>🤖 Machine Learning Analysis</h2>
+            <button onclick="toggleMLDashboard()" class="close-btn">✕</button>
+        </div>
+        
+        <div class="ml-content">
+            <!-- Algorithm Classification -->
+            <div class="ml-panel">
+                <h3>🎯 Algorithm Classification</h3>
+                <div id="algo-classification">
+                    <div class="classification-result">
+                        <span class="label">Detected Algorithm:</span>
+                        <span id="detected-algo" class="value">-</span>
+                    </div>
+                    <div class="classification-result">
+                        <span class="label">ML Confidence:</span>
+                        <span id="ml-confidence" class="value">-</span>
+                    </div>
+                    <div class="confidence-bar">
+                        <div id="confidence-fill" class="confidence-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complexity Analysis -->
+            <div class="ml-panel">
+                <h3>⚡ Complexity Analysis</h3>
+                <div id="complexity-analysis">
+                    <div class="complexity-item">
+                        <span class="complexity-label">Time Complexity:</span>
+                        <code id="time-complexity" class="complexity-value">-</code>
+                    </div>
+                    <div class="complexity-item">
+                        <span class="complexity-label">Space Complexity:</span>
+                        <code id="space-complexity" class="complexity-value">-</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graph Features (GNN) -->
+            <div class="ml-panel">
+                <h3>🕸️ Graph Neural Network Features</h3>
+                <div id="graph-features">
+                    <canvas id="gnn-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- BERT Semantic Features -->
+            <div class="ml-panel">
+                <h3>🧠 BERT Semantic Analysis</h3>
+                <div id="semantic-features">
+                    <canvas id="semantic-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Optimization Suggestions -->
+            <div class="ml-panel">
+                <h3>💡 AI Optimization Suggestions</h3>
+                <div id="optimization-suggestions">
+                    <ul id="suggestions-list"></ul>
+                </div>
+            </div>
+
+            <!-- Step-by-Step ML Confidence -->
+            <div class="ml-panel full-width">
+                <h3>📊 ML Confidence per Step</h3>
+                <canvas id="confidence-timeline"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="main-container">
+        <!-- Control Panel -->
+        <div id="controls">
+            <div class="logo-section">
+                <h1>🤖 ML Visualizer</h1>
+                <p class="subtitle">Machine Learning Powered</p>
+            </div>
+
+            <div class="input-section">
+                <label class="input-label">
+                    <span class="label-icon">📁</span>
+                    Upload Algorithm JSON
+                </label>
+                <input type="file" id="jsonInput" accept=".json" 
+                       onchange="loadAlgorithmFromJSON(event)" 
+                       class="file-input" />
+            </div>
+
+            <div class="input-group">
+                <div class="input-field">
+                    <label>Start Node</label>
+                    <input type="text" id="startNodeInput" placeholder="e.g., A" maxlength="5" />
+                </div>
+                <div class="input-field">
+                    <label>End Node</label>
+                    <input type="text" id="endNodeInput" placeholder="e.g., F" maxlength="5" />
+                </div>
+            </div>
+
+            <button onclick="runAlgorithm()" class="primary-btn">
+                <span class="btn-icon">▶️</span>
+                Run with ML Analysis
+            </button>
+
+            <button onclick="toggleMLDashboard()" class="ml-btn">
+                <span class="btn-icon">🤖</span>
+                View ML Dashboard
+            </button>
+
+            <div class="divider"></div>
+
+            <button onclick="showGraphEditor()" class="secondary-btn">
+                <span class="btn-icon">✏️</span>
+                Edit Graph
+            </button>
+
+            <div id="graphEditor" class="graph-editor hidden">
+                <h4>Graph Editor</h4>
+                <div class="editor-section">
+                    <label>Node Operations</label>
+                    <input type="text" id="nodeName" placeholder="Node name" />
+                    <div class="btn-group">
+                        <button onclick="addNode()">+ Add</button>
+                        <button onclick="removeNode()">- Remove</button>
+                    </div>
+                </div>
+                <div class="editor-section">
+                    <label>Edge Operations</label>
+                    <input type="text" id="fromNode" placeholder="From" />
+                    <input type="text" id="toNode" placeholder="To" />
+                    <input type="number" id="edgeValue" placeholder="Weight" />
+                    <div class="btn-group">
+                        <button onclick="addEdge()">+ Add Edge</button>
+                        <button onclick="removeEdge()">- Remove</button>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="resetGraph()" class="secondary-btn">
+                <span class="btn-icon">🔄</span>
+                Reset Graph
+            </button>
+
+            <button onclick="randomGraph()" class="secondary-btn">
+                <span class="btn-icon">🎲</span>
+                Random Graph
+            </button>
+
+            <!-- ML Models Info -->
+            <div class="ml-info">
+                <h4>🧪 ML Models Active</h4>
+                <div class="model-badge">
+                    <span class="badge-icon">🔤</span>
+                    <span>BERT NLP</span>
+                </div>
+                <div class="model-badge">
+                    <span class="badge-icon">🕸️</span>
+                    <span>Graph NN</span>
+                </div>
+                <div class="model-badge">
+                    <span class="badge-icon">🌳</span>
+                    <span>Random Forest</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Visualization Area -->
+        <div id="main-content">
+            <!-- Graph Canvas -->
+            <div id="canvas-container">
+                <svg id="graph" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+                
+                <!-- Color Legend -->
+                <div id="color-legend">
+                    <h4>Color Legend</h4>
+                    <div class="legend-item">
+                        <span class="legend-color yellow"></span>
+                        <span>Exploring</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color red"></span>
+                        <span>Current</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color green"></span>
+                        <span>Updated</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color blue"></span>
+                        <span>Completed</span>
+                    </div>
+                </div>
+
+                <!-- ML Confidence Badge -->
+                <div id="ml-badge" class="ml-confidence-badge hidden">
+                    <div class="badge-content">
+                        <span class="badge-label">ML Confidence</span>
+                        <span id="current-confidence" class="badge-value">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playback Controls -->
+            <div id="playback-controls">
+                <button onclick="prevStep()" class="control-btn">⮜</button>
+                <button id="playPauseBtn" onclick="togglePlayPause()" class="control-btn play-btn">▶</button>
+                <button onclick="nextStep()" class="control-btn">⮞</button>
+                
+                <div class="speed-control">
+                    <label>Speed:</label>
+                    <input type="range" min="1" max="5" value="3" 
+                           id="speed" oninput="updateSpeed(this.value)" />
+                    <span id="speed-value">3x</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Steps & Pseudocode Panel -->
+        <div id="explanation-panel" class="explanation-panel">
+            <!-- Steps List -->
+            <div id="steps-section">
+                <h3>
+                    <span class="section-icon">📋</span>
+                    Algorithm Steps
+                </h3>
+                <div id="dynamic-steps-area"></div>
+            </div>
+
+            <!-- Pseudocode -->
+            <div id="pseudocode-section">
+                <h3>
+                    <span class="section-icon">💻</span>
+                    Pseudocode
+                    <span class="ml-tag">ML-Enhanced</span>
+                </h3>
+                <div id="pseudocode-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button id="fab-ml" onclick="toggleMLDashboard()" class="fab">
+        <span class="fab-icon">🤖</span>
+        <span class="fab-label">ML Analysis</span>
+    </button>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Running ML Analysis...</p>
+            <small>BERT • GNN • Classification</small>
+        </div>
+    </div>
+
+    <script src="./visualizer_ml.js"></script>
+</body>
+</html>

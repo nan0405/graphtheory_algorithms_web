@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AlgoVisualizer — Khám phá Thuật toán</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="main.css" />
+</head>
+
+<body>
+
+    <!-- ═══════════════════ CANVAS BACKGROUND ═══════════════════ -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- ═══════════════════ HEADER ═══════════════════ -->
+    <header id="site-header">
+        <div class="header-inner">
+            <div class="logo" data-section="home">
+                <span class="logo-icon">⬡</span>
+                <span class="logo-text">Algo<em>Viz</em></span>
+            </div>
+
+            <nav id="main-nav">
+                <a class="nav-link active" data-section="home">Trang chủ</a>
+                <!-- <a class="nav-link" data-section="theory">Lý thuyết</a> -->
+                <a class="nav-link" data-section="visualize">Minh họa</a>
+                <a class="nav-link" data-section="games">Trò chơi</a>
+                <a class="nav-link" data-section="chat">Truy vấn AI</a>
+                <!-- <a class="nav-link" data-section="help">Trợ giúp</a>
+                <a class="nav-link" data-section="profile">Tôi</a> -->
+            </nav>
+
+            <!-- <div class="header-right">
+                <button class="btn-login" data-section="profile">Đăng nhập</button>
+                <button class="hamburger" id="hamburger" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div> -->
+        </div>
+    </header>
+
+    <!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+    <main id="app">
+
+        <!-- ───────── 1. TRANG CHỦ ───────── -->
+        <section id="section-home" class="section active">
+
+            <!-- Hero -->
+            <div class="hero">
+                <div class="hero-bg-text">ALGO</div>
+                <div class="hero-content">
+                    <div class="hero-badge">🚀 Nền tảng học thuật toán</div>
+                    <h1 class="hero-title">
+                        <span class="line-reveal">Khám phá</span>
+                        <span class="line-reveal delay-1">Thuật toán</span>
+                        <span class="line-reveal delay-2 gradient-text">Trực quan</span>
+                    </h1>
+                    <!-- <p class="hero-sub">Học thuật toán qua hình ảnh động, trò chơi tương tác và hệ thống lý thuyết chuẩn
+                        đại học — không còn khô khan.</p> -->
+                    <div class="hero-ctas">
+                        <button class="btn-primary" data-section="visualize">
+                            <span>Xem minh họa</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                        <button class="btn-ghost" data-section="chat">Hỏi AI ngay</button>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat"><strong>8+</strong><span>Thuật toán</span></div>
+                        <div class="stat-divider"></div>
+                        <!-- <div class="stat"><strong>6</strong><span>Chương lý thuyết</span></div> -->
+                        <div class="stat-divider"></div>
+                        <div class="stat"><strong>3</strong><span>Trò chơi</span></div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="graph-demo" id="hero-graph"></div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="home-features reveal-section">
+                <div class="section-label">Hệ thống học tập</div>
+                <h2 class="section-title">Tất cả trong một nơi</h2>
+                <div class="feature-grid">
+                    <div class="feature-card" data-section="visualize">
+                        <div class="feature-icon">🎬</div>
+                        <h3>Minh họa trực quan</h3>
+                        <p>Xem thuật toán hoạt động từng bước, thay đổi tốc độ và dữ liệu đầu vào.</p>
+                        <span class="feature-arrow">→</span>
+                    </div>
+                    <!-- <div class="feature-card" data-section="theory">
+                        <div class="feature-icon">📚</div>
+                        <h3>Lý thuyết chuẩn</h3>
+                        <p>6 chương lý thuyết được biên soạn từ giáo trình đại học, dễ hiểu.</p>
+                        <span class="feature-arrow">→</span>
+                    </div> -->
+                    <div class="feature-card" data-section="games">
+                        <div class="feature-icon">🎮</div>
+                        <h3>Trò chơi học tập</h3>
+                        <p>Học thuật toán qua game thực tế — ghi nhớ lâu hơn gấp 3 lần.</p>
+                        <span class="feature-arrow">→</span>
+                    </div>
+                    <div class="feature-card" data-section="chat">
+                        <div class="feature-icon">🤖</div>
+                        <h3>Trợ lý AI</h3>
+                        <p>Hỏi bất cứ điều gì về thuật toán — giải thích chi tiết, ví dụ cụ thể.</p>
+                        <span class="feature-arrow">→</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Algorithms showcase -->
+            <div class="algo-showcase reveal-section">
+                <div class="section-label">Thuật toán nổi bật</div>
+                <h2 class="section-title">Các thuật toán đồ thị</h2>
+                <div class="algo-pills">
+                    <span class="algo-pill">Dijkstra</span>
+                    <span class="algo-pill">Bellman-Ford</span>
+                    <span class="algo-pill">Prim</span>
+                    <span class="algo-pill">Kruskal</span>
+                    <span class="algo-pill">DFS</span>
+                    <span class="algo-pill">BFS</span>
+                    <span class="algo-pill">Euler</span>
+                    <span class="algo-pill">Hamilton</span>
+                    <span class="algo-pill more">+more</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ───────── 2. LÝ THUYẾT ───────── -->
+        <section id="section-theory" class="section">
+            <!-- <div class="page-header">
+                <div class="section-label">Kiến thức nền tảng</div>
+                <h1>Hệ Thống Lý Thuyết</h1>
+                <p>Từ định nghĩa cơ bản đến thuật toán nâng cao — có đủ mọi thứ bạn cần.</p>
+            </div> -->
+
+            <div class="theory-grid">
+
+                <div class="theory-card" data-chapter="1">
+                    <div class="chapter-badge">Ch.01</div>
+                    <div class="theory-icon">🌐</div>
+                    <div class="theory-body">
+                        <h3>Đại cương về Đồ thị</h3>
+                        <p>Định nghĩa, biểu diễn đồ thị, đơn đồ thị, đa đồ thị và các dạng đặc biệt.</p>
+                        <div class="theory-meta">
+                            <span class="tag">Cơ bản</span>
+                            <span class="tag">~30 phút</span>
+                        </div>
+                        <button class="btn-read">Xem minh họa →</button>
+                    </div>
+                </div>
+
+                <div class="theory-card" data-chapter="2">
+                    <div class="chapter-badge">Ch.02</div>
+                    <div class="theory-icon">🔍</div>
+                    <div class="theory-body">
+                        <h3>Biểu diễn & Tìm kiếm</h3>
+                        <p>Ma trận kề, danh sách kề và thuật toán tìm kiếm DFS, BFS trên máy tính.</p>
+                        <div class="theory-meta">
+                            <span class="tag">Trung bình</span>
+                            <span class="tag">~45 phút</span>
+                        </div>
+                        <button class="btn-read">Xem minh họa →</button>
+                    </div>
+                </div>
+
+                <div class="theory-card" data-chapter="3">
+                    <div class="chapter-badge">Ch.03</div>
+                    <div class="theory-icon">🔄</div>
+                    <div class="theory-body">
+                        <h3>Euler & Hamilton</h3>
+                        <p>Chu trình Euler, thuật toán Fleury và bài toán đường đi Hamilton.</p>
+                        <div class="theory-meta">
+                            <span class="tag">Trung bình</span>
+                            <span class="tag">~40 phút</span>
+                        </div>
+                        <button class="btn-read">Xem minh họa →</button>
+                    </div>
+                </div>
+
+                <div class="theory-card" data-chapter="4">
+                    <div class="chapter-badge">Ch.04</div>
+                    <div class="theory-icon">📏</div>
+                    <div class="theory-body">
+                        <h3>Đường đi ngắn nhất</h3>
+                        <p>Chi tiết về thuật toán Dijkstra và Floyd để tối ưu hóa đường đi.</p>
+                        <div class="theory-meta">
+                            <span class="tag">Nâng cao</span>
+                            <span class="tag">~60 phút</span>
+                        </div>
+                        <button class="btn-read">Xem minh họa →</button>
+                    </div>
+                </div>
+
+                <div class="theory-card" data-chapter="5">
+                    <div class="chapter-badge">Ch.05</div>
+                    <div class="theory-icon">🎨</div>
+                    <div class="theory-body">
+                        <h3>Đồ thị phẳng & Tô màu</h3>
+                        <p>Khái niệm đồ thị phẳng và các bài toán tô màu bản đồ ứng dụng thực tế.</p>
+                        <div class="theory-meta">
+                            <span class="tag">Nâng cao</span>
+                            <span class="tag">~50 phút</span>
+                        </div>
+                        <button class="btn-read">Xem minh họa →</button>
+                    </div>
+                </div>
+
+                <div class="theory-card" data-chapter="6">
+                    <div class="chapter-badge">Ch.06</div>
+                    <div class="theory-icon">🌳</div>
+                    <div class="theory-body">
+                        <h3>Cây (Tree)</h3>
+                        <p>Cây khung nhỏ nhất, thuật toán Kruskal, Prim và duyệt cây nhị phân.</p>
+                        <div class="theory-meta">
+                            <span class="tag">Nâng cao</span>
+                            <span class="tag">~55 phút</span>
+                        </div>
+                        <button class="btn-read">Xem minh họa →</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ───────── 3. MINH HỌA THUẬT GIẢI ───────── -->
+        <section id="section-visualize" class="section">
+            <div class="page-header">
+                <div class="section-label">Tương tác</div>
+                <h1>Minh Họa Thuật Giải</h1>
+            </div>
+
+            <div class="algo-grid">
+
+                <div class="algo-card-item" data-algo="dijkstra">
+                    <div class="algo-card-glow"></div>
+                    <div class="algo-card-inner">
+                        <!-- <div class="algo-badge complexity">O((V+E) log V)</div> -->
+                        <div class="algo-thumb">
+                            <canvas class="algo-preview-canvas" width="200" height="120" data-algo="dijkstra"></canvas>
+                        </div>
+                        <h3>Dijkstra</h3>
+                        <p>Tìm đường đi ngắn nhất từ một đỉnh nguồn, dùng hàng đợi ưu tiên.</p>
+                        <button class="btn-algo-demo"
+                            onclick="window.location.href='./USER/THUẬT_TOÁN/DIJKSTRA/dijktra.html'">
+                            ▶ Xem minh họa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="algo-card-item" data-algo="bellman">
+                    <div class="algo-card-glow"></div>
+                    <div class="algo-card-inner">
+                        <!-- <div class="algo-badge complexity">O(V·E)</div> -->
+                        <div class="algo-thumb">
+                            <canvas class="algo-preview-canvas" width="200" height="120" data-algo="bellman"></canvas>
+                        </div>
+                        <h3>Bellman-Ford</h3>
+                        <p>Tìm đường đi ngắn nhất, xử lý được cạnh âm và phát hiện chu trình âm.</p>
+                        <button class="btn-algo-demo">▶ Xem minh họa</button>
+                    </div>
+                </div>
+
+                <div class="algo-card-item" data-algo="prim">
+                    <div class="algo-card-glow"></div>
+                    <div class="algo-card-inner">
+                        <!-- <div class="algo-badge complexity">O(E log V)</div> -->
+                        <div class="algo-thumb">
+                            <canvas class="algo-preview-canvas" width="200" height="120" data-algo="prim"></canvas>
+                        </div>
+                        <h3>Prim</h3>
+                        <p>Xây dựng cây khung nhỏ nhất bằng cách mở rộng từ một đỉnh bất kỳ.</p>
+                        <button class="btn-algo-demo" onclick="window.location.href='./USER/THUẬT_TOÁN/PRIM/prim.html'">
+                            ▶ Xem minh họa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="algo-card-item" data-algo="kruskal">
+                    <div class="algo-card-glow"></div>
+                    <div class="algo-card-inner">
+                        <!-- <div class="algo-badge complexity">O(E log E)</div> -->
+                        <div class="algo-thumb">
+                            <canvas class="algo-preview-canvas" width="200" height="120" data-algo="kruskal"></canvas>
+                        </div>
+                        <h3>Kruskal</h3>
+                        <p>Xây dựng MST bằng cách chọn cạnh có trọng số nhỏ nhất không tạo chu trình.</p>
+                        <button class="btn-algo-demo"
+                            onclick="window.location.href='./USER/THUẬT_TOÁN/KRUSKAL/kruskal.html'">
+                            ▶ Xem minh họa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="algo-card-item" data-algo="dfs">
+                    <div class="algo-card-glow"></div>
+                    <div class="algo-card-inner">
+                        <!-- <div class="algo-badge complexity">O(V+E)</div> -->
+                        <div class="algo-thumb">
+                            <canvas class="algo-preview-canvas" width="200" height="120" data-algo="dfs"></canvas>
+                        </div>
+                        <h3>DFS</h3>
+                        <p>Duyệt đồ thị theo chiều sâu, ứng dụng rộng trong topo sort và kiểm tra liên thông.</p>
+                        <button class="btn-algo-demo" onclick="window.location.href='./USER/THUẬT_TOÁN/DFS/dfs.html'">
+                            ▶ Xem minh họa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="algo-card-item" data-algo="bfs">
+                    <div class="algo-card-glow"></div>
+                    <div class="algo-card-inner">
+                        <!-- <div class="algo-badge complexity">O(V+E)</div> -->
+                        <div class="algo-thumb">
+                            <canvas class="algo-preview-canvas" width="200" height="120" data-algo="bfs"></canvas>
+                        </div>
+                        <h3>BFS</h3>
+                        <p>Duyệt đồ thị theo chiều rộng, tìm đường đi ngắn nhất trong đồ thị không trọng số.</p>
+                        <button class="btn-algo-demo" onclick="window.location.href='./USER/THUẬT_TOÁN/BFS/bfs.html'">
+                            ▶ Xem minh họa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="algo-card-item" data-algo="euler">
+                    <div class="algo-card-glow"></div>
+                    <div class="algo-card-inner">
+                        <!-- <div class="algo-badge complexity">O(E)</div> -->
+                        <div class="algo-thumb">
+                            <canvas class="algo-preview-canvas" width="200" height="120" data-algo="euler"></canvas>
+                        </div>
+                        <h3>Euler</h3>
+                        <p>Tìm chu trình Euler đi qua mỗi cạnh đúng một lần, thuật toán Fleury.</p>
+                        <button class="btn-algo-demo"
+                            onclick="window.location.href='./USER/THUẬT_TOÁN/EULER/euler.html'">
+                            ▶ Xem minh họa
+                        </button>
+                    </div>
+                </div>
+
+                <div class="algo-card-item" data-algo="hamilton">
+                    <div class="algo-card-glow"></div>
+                    <div class="algo-card-inner">
+                        <!-- <div class="algo-badge complexity">O(n!)</div> -->
+                        <div class="algo-thumb">
+                            <canvas class="algo-preview-canvas" width="200" height="120" data-algo="hamilton"></canvas>
+                        </div>
+                        <h3>Hamilton</h3>
+                        <p>Tìm đường đi qua mỗi đỉnh đúng một lần — bài toán NP-complete kinh điển.</p>
+                        <button class="btn-algo-demo"
+                            onclick="window.location.href='./USER/THUẬT_TOÁN/HAMILTON/hamilton.html'">
+                            ▶ Xem minh họa
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Demo -->
+            <div id="algo-modal" class="modal-overlay" hidden>
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h2 id="modal-title">Thuật toán</h2>
+                        <button class="modal-close" id="modal-close">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <canvas id="demo-canvas" width="600" height="380"></canvas>
+                        <div class="demo-controls">
+                            <button id="demo-play" class="btn-demo-ctrl">▶ Play</button>
+                            <button id="demo-step" class="btn-demo-ctrl">Step →</button>
+                            <button id="demo-reset" class="btn-demo-ctrl">↺ Reset</button>
+                            <div class="speed-control">
+                                <label>Tốc độ:</label>
+                                <input type="range" id="demo-speed" min="1" max="10" value="5">
+                            </div>
+                        </div>
+                        <div id="demo-log" class="demo-log"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ───────── 4. TRÒ CHƠI ───────── -->
+        <section id="section-games" class="section">
+            <div class="page-header">
+                <div class="section-label">Học qua vui chơi</div>
+                <h1>Trò chơi</h1>
+            </div>
+
+            <div class="games-grid">
+
+                <div class="game-card-item available">
+                    <div class="game-card-bg" style="--gc: #06b6d4"></div>
+                    <div class="game-icon-big">🏃</div>
+                    <h3>Pixel Jump</h3>
+                    <p>Điều khiển nhân vật nhảy qua các chướng ngại vật được sinh ra theo thuật toán BFS.</p>
+                    <!-- <div class="game-tags">
+                        <span>BFS</span><span>Pathfinding</span>
+                    </div> -->
+                    <a href="./USER/GAME/PIXEL JUMP GRAPH QUEST/game.html" class="btn-play" target="_blank">
+                        🎮 Chơi ngay
+                    </a>
+                </div>
+
+                <div class="game-card-item available">
+                    <div class="game-card-bg" style="--gc: #8b5cf6"></div>
+                    <div class="game-icon-big">❌⭕</div>
+                    <h3>Cờ Caro</h3>
+                    <p>Chơi cờ caro 10×10 với AI sử dụng thuật toán Minimax với Alpha-Beta pruning.</p>
+                    <!-- <div class="game-tags">
+                        <span>Minimax</span><span>Game Theory</span>
+                    </div> -->
+                    <a href="./USER/GAME/CARO/CARO.HTML" class="btn-play" target="_blank">
+                        🎮 Chơi ngay
+                    </a>
+                </div>
+
+                <div class="game-card-item coming">
+                    <div class="game-card-bg" style="--gc: #f59e0b"></div>
+                    <div class="game-icon-big">🚗</div>
+                    <h3>Chạy xe</h3>
+                    <p>Điều hướng xe trên bản đồ đồ thị, tối ưu tuyến đường bằng Dijkstra.</p>
+                    <!-- <div class="game-tags">
+                        <span>Dijkstra</span><span>Navigation</span>
+                    </div> -->
+                    <a href="./USER/GAME/DUAXE/index.html" class="btn-play" target="_blank">
+                        🎮 Chơi ngay
+                    </a>
+                </div>
+
+                <!-- <div class="game-card-item coming">
+                    <div class="game-card-bg" style="--gc: #ef4444"></div>
+                    <div class="game-status-badge coming-badge">🔜 Sắp ra</div>
+                    <div class="game-icon-big">🧩</div>
+                    <h3>Maze Solver</h3>
+                    <p>Giải mê cung bằng DFS hoặc BFS — so sánh hiệu quả của từng phương pháp.</p>
+                    <div class="game-tags">
+                        <span>DFS</span><span>Maze</span>
+                    </div>
+                    <button class="btn-play disabled">Sắp ra mắt</button>
+                </div> -->
+
+            </div>
+        </section>
+
+        <!-- ───────── 5. TRUY VẤN AI (CHAT) ───────── -->
+        <section id="section-chat" class="section">
+            <div class="chat-layout">
+
+                <!-- Sidebar -->
+                <aside class="chat-sidebar">
+                    <div class="chat-sidebar-header">
+                        <span>💬 Lịch sử chat</span>
+                        <button id="new-chat-btn" title="Chat mới">+</button>
+                    </div>
+                    <div class="chat-history" id="chat-history">
+                        <div class="history-item active">
+                            <span class="history-icon">🌐</span>
+                            <span>Dijkstra là gì?</span>
+                        </div>
+                        <div class="history-item">
+                            <span class="history-icon">🔄</span>
+                            <span>So sánh DFS và BFS</span>
+                        </div>
+                        <div class="history-item">
+                            <span class="history-icon">📏</span>
+                            <span>Cây khung nhỏ nhất</span>
+                        </div>
+                        <div class="history-item">
+                            <span class="history-icon">🎨</span>
+                            <span>Bài toán tô màu đồ thị</span>
+                        </div>
+                    </div>
+                    <div class="chat-sidebar-footer">
+                        <!-- <div class="user-mini">
+                            <div class="user-avatar">👤</div>
+                            <span>Guest User</span>
+                        </div> -->
+                    </div>
+                </aside>
+
+                <!-- Main Chat -->
+                <div class="chat-main">
+                    <div class="chat-header-bar">
+                        <div class="chat-title">
+                            <div class="ai-dot"></div>
+                            <span>AlgoAI — Trợ lý thuật toán</span>
+                        </div>
+
+                    </div>
+
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message bot-message">
+                            <div class="msg-avatar bot-avatar">⬡</div>
+                            <div class="msg-content">
+                                <div class="msg-name">AlgoAI</div>
+                                <div class="msg-bubble">
+                                    Xin chào! Tôi là trợ lý AI chuyên về <strong>thuật toán đồ thị</strong>. Bạn có thể
+                                    hỏi tôi về:<br><br>
+                                    🔹 Dijkstra, BFS, DFS, Prim, Kruskal...<br>
+                                    🔹 So sánh độ phức tạp thuật toán<br>
+                                    🔹 Giải thích từng bước thuật toán<br>
+                                    🔹 Code mẫu bằng Python/C++<br><br>
+                                    Bạn muốn tìm hiểu gì hôm nay?
+                                </div>
+                                <div class="msg-time">Vừa xong</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-quick-prompts" id="quick-prompts">
+                        <button class="quick-prompt" data-prompt="Giải thích thuật toán Dijkstra từng bước">Dijkstra là
+                            gì?</button>
+                        <button class="quick-prompt" data-prompt="So sánh DFS và BFS về độ phức tạp và ứng dụng">So sánh
+                            DFS vs BFS</button>
+                        <button class="quick-prompt"
+                            data-prompt="Cây khung nhỏ nhất là gì? Khi nào dùng Prim vs Kruskal?">MST: Prim vs
+                            Kruskal</button>
+                        <button class="quick-prompt" data-prompt="Viết code Python cho thuật toán BFS">Code BFS
+                            Python</button>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <div class="chat-input-box">
+                            <textarea id="chat-input" placeholder="Hỏi về thuật toán..." rows="1"></textarea>
+                            <button id="chat-send" class="btn-send" aria-label="Gửi">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="chat-disclaimer">AlgoAI có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ───────── 6. TRỢ GIÚP ───────── -->
+        <section id="section-help" class="section">
+            <div class="page-header">
+                <div class="section-label">Support</div>
+                <h1>Trợ Giúp</h1>
+                <p>Tìm câu trả lời nhanh hoặc liên hệ với chúng tôi.</p>
+            </div>
+
+            <div class="help-layout">
+                <div class="faq-col">
+                    <h2 class="help-sub-title">❓ Câu hỏi thường gặp</h2>
+                    <div class="faq-list" id="faq-list">
+
+                        <div class="faq-item">
+                            <button class="faq-q">
+                                AlgoVisualizer là gì và dành cho ai?
+                                <span class="faq-arrow">▾</span>
+                            </button>
+                            <div class="faq-a">
+                                AlgoVisualizer là nền tảng học thuật toán đồ thị qua hình ảnh trực quan, phù hợp với
+                                sinh viên CNTT, học sinh THPT chuyên và những người muốn củng cố kiến thức thuật toán.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-q">
+                                Làm sao để sử dụng phần minh họa thuật giải?
+                                <span class="faq-arrow">▾</span>
+                            </button>
+                            <div class="faq-a">
+                                Vào mục <strong>Minh họa</strong> ở thanh điều hướng, chọn thuật toán muốn xem, nhấn
+                                <strong>▶ Minh họa</strong>. Bạn có thể điều chỉnh tốc độ và bấm từng bước để hiểu rõ
+                                hơn.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-q">
+                                Tôi có cần đăng nhập để sử dụng không?
+                                <span class="faq-arrow">▾</span>
+                            </button>
+                            <div class="faq-a">
+                                Không cần! Tất cả chức năng học tập đều miễn phí và không yêu cầu đăng nhập. Đăng nhập
+                                chỉ cần thiết nếu bạn muốn lưu tiến trình học và nhận huy hiệu.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-q">
+                                Trợ lý AI có thể giải toán được không?
+                                <span class="faq-arrow">▾</span>
+                            </button>
+                            <div class="faq-a">
+                                AlgoAI có thể giải thích thuật toán, viết code mẫu và phân tích độ phức tạp. Với các bài
+                                toán cụ thể, hãy mô tả rõ yêu cầu để nhận câu trả lời chính xác nhất.
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-q">
+                                Các trò chơi có liên quan đến thuật toán không?
+                                <span class="faq-arrow">▾</span>
+                            </button>
+                            <div class="faq-a">
+                                Có! Mỗi trò chơi được thiết kế để minh họa một thuật toán cụ thể. Ví dụ: Pixel Jump dùng
+                                BFS để sinh đường đi, Cờ Caro dùng Minimax...
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="contact-col">
+                    <h2 class="help-sub-title">📬 Liên hệ</h2>
+                    <div class="contact-form-card">
+                        <div class="form-group">
+                            <label>Họ tên</label>
+                            <input type="text" placeholder="Nguyễn Văn A" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="example@email.com" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label>Chủ đề</label>
+                            <select class="form-input">
+                                <option>Báo lỗi</option>
+                                <option>Góp ý tính năng</option>
+                                <option>Câu hỏi về nội dung</option>
+                                <option>Khác</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tin nhắn</label>
+                            <textarea class="form-input" rows="4" placeholder="Mô tả vấn đề của bạn..."></textarea>
+                        </div>
+                        <button class="btn-submit">Gửi tin nhắn →</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ───────── 7. TÔI (PROFILE) ───────── -->
+        <section id="section-profile" class="section">
+            <div class="profile-layout">
+
+                <div class="profile-card-main">
+                    <div class="profile-avatar-wrap">
+                        <div class="profile-avatar">👤</div>
+                        <div class="profile-level-badge">Lv.7</div>
+                    </div>
+                    <h2 class="profile-name">Khách</h2>
+                    <p class="profile-handle">@guest_user</p>
+                    <div class="profile-bio">Đang học thuật toán đồ thị 📚</div>
+                    <div class="profile-badges">
+                        <span class="badge" title="Hoàn thành Dijkstra">🏆</span>
+                        <span class="badge" title="Chơi game 5 lần">🎮</span>
+                        <!-- <span class="badge" title="Đọc 3 chương lý thuyết">📖</span> -->
+                        <span class="badge locked" title="Chưa mở khóa">🔒</span>
+                        <span class="badge locked" title="Chưa mở khóa">🔒</span>
+                    </div>
+                    <button class="btn-logout">Đăng xuất</button>
+                </div>
+
+                <div class="profile-stats-col">
+                    <h2 class="stats-title">📊 Thống kê học tập</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-num">12</div>
+                            <div class="stat-label">Buổi học</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-num">3/6</div>
+                            <div class="stat-label">Chương hoàn thành</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-num">5</div>
+                            <div class="stat-label">Thuật toán đã xem</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-num">850</div>
+                            <div class="stat-label">Điểm XP</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <h3>Tiến độ từng chương</h3>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>Ch.1 Đại cương</span><span>100%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:100%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>Ch.2 DFS & BFS</span><span>80%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:80%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>Ch.3 Euler & Hamilton</span><span>60%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:60%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>Ch.4 Đường đi ngắn nhất</span><span>30%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:30%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>Ch.5 Đồ thị phẳng</span><span>0%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>Ch.6 Cây</span><span>0%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer id="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="logo-icon">⬡</span>
+                <span>AlgoViz © 2026</span>
+            </div>
+            <div class="footer-links">
+                <a href="#" data-section="help">Liên hệ</a>
+                <a href="#">GitHub</a>
+                <a href="#">Chính sách</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./main.js"></script>
+</body>
+
+</html>

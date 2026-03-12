@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧑‍🏫 Tạo Thuật Toán - Dành cho Giáo Viên</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .panel {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .panel-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.05em;
+        }
+
+        .helper {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+            background: #fff3cd;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        textarea {
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 400px;
+            line-height: 1.8;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 12px;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .examples {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #2196f3;
+            margin-top: 20px;
+        }
+
+        .examples h4 {
+            color: #1976d2;
+            margin-bottom: 12px;
+        }
+
+        .examples pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 18px 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            display: none;
+            font-weight: 600;
+            z-index: 1000;
+            max-width: 400px;
+            border-left: 5px solid #4caf50;
+        }
+
+        .notification.show {
+            display: block;
+            animation: slideInRight 0.4s ease;
+        }
+
+        .notification.error {
+            border-left-color: #f44336;
+        }
+
+        .notification.success {
+            border-left-color: #4caf50;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .syntax-guide {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .syntax-guide h5 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .syntax-guide code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧑‍🏫 Tạo Thuật Toán Minh Họa</h1>
+            <p>Viết mã giả tự nhiên - Hệ thống tự động tạo animation</p>
+        </div>
+
+        <div class="main-content">
+            <!-- LEFT PANEL: Algorithm Info -->
+            <div class="panel">
+                <div class="panel-title">
+                    📝 Thông Tin Thuật Toán
+                </div>
+
+                <div class="form-group">
+                    <label>Tên Thuật Toán</label>
+                    <input type="text" id="algoName" placeholder="VD: Dijkstra, BFS, DFS, Prim..."
+                        value="Thuật toán Dijkstra">
+                </div>
+
+                <div class="form-group">
+                    <label>Mô Tả Thuật Toán</label>
+                    <input type="text" id="algoDesc" placeholder="Mô tả ngắn gọn về thuật toán..."
+                        value="Tìm đường đi ngắn nhất từ một đỉnh đến các đỉnh khác">
+                </div>
+
+                <div class="form-group">
+                    <label>Đồ Thị Minh Họa (JSON)</label>
+                    <textarea id="graphJSON" placeholder='{"nodes": ["a","b","c"], "edges": [...]}'
+                        style="min-height: 200px; background: white; color: #333;">{
+  "nodes": ["a", "b", "c", "d", "e", "f"],
+  "edges": [
+    {"from": "a", "to": "b", "weight": 42},
+    {"from": "a", "to": "c", "weight": 4},
+    {"from": "a", "to": "d", "weight": 10},
+    {"from": "b", "to": "e", "weight": 14},
+    {"from": "c", "to": "d", "weight": 3},
+    {"from": "d", "to": "e", "weight": 1},
+    {"from": "d", "to": "f", "weight": 10}
+  ]
+}</textarea>
+                    <div class="helper">
+                        💡 Định dạng: nodes là mảng tên đỉnh, edges có from, to, weight
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Đỉnh Bắt Đầu (tùy chọn)</label>
+                    <input type="text" id="startNode" placeholder="a" value="a">
+                </div>
+
+                <div class="form-group">
+                    <label>Đỉnh Kết Thúc (tùy chọn)</label>
+                    <input type="text" id="endNode" placeholder="f" value="f">
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Pseudocode -->
+            <div class="panel">
+                <div class="panel-title">
+                    🧠 Mã Giả Tự Nhiên
+                </div>
+
+                <div class="syntax-guide">
+                    <h5>✨ Hướng Dẫn Viết Mã Giả:</h5>
+                    <p style="font-size: 0.95em; color: #666; line-height: 1.6; margin-top: 8px;">
+                        • Viết tự nhiên như khi giảng bài<br>
+                        • Dùng từ khóa: <code>khởi tạo</code>, <code>thêm vào Open</code>, <code>lấy từ Open</code>,
+                        <code>đánh dấu Close</code>, <code>cập nhật dist</code><br>
+                        • Mỗi dòng = 1 bước animation<br>
+                        • Có thể thêm [voice: text] cho giải thích bằng giọng nói
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label>Viết Mã Giả (mỗi dòng = 1 bước)</label>
+                    <textarea id="pseudocode" placeholder="Nhập mã giả của bạn...">Khởi tạo dist[start] = 0, các đỉnh khác = vô cùng [voice: Bắt đầu thuật toán, khởi tạo khoảng cách]
+Thêm đỉnh start vào Open [voice: Thêm đỉnh xuất phát vào tập Open]
+Lặp khi Open không rỗng
+Lấy đỉnh x từ Open có dist nhỏ nhất [voice: Chọn đỉnh có khoảng cách nhỏ nhất]
+Thêm x vào Close [voice: Đánh dấu đỉnh x đã hoàn thành]
+Xét các đỉnh y kề với x [voice: Kiểm tra các đỉnh láng giềng]
+Nếu y chưa thuộc Close
+Nếu y chưa thuộc Open thì thêm y vào Open
+Nếu dist[y] > dist[x] + weight(x,y) thì cập nhật dist[y] [voice: Cập nhật khoảng cách nếu tìm được đường ngắn hơn]
+Kết thúc thuật toán [voice: Hoàn thành, đã tìm được đường đi ngắn nhất]</textarea>
+                </div>
+
+                <div class="examples">
+                    <h4>📚 Ví Dụ Mã Giả Khác:</h4>
+                    <pre>// BFS
+Khởi tạo queue rỗng
+Thêm start vào queue
+Đánh dấu start đã visited
+Lặp khi queue không rỗng
+  Lấy u từ queue
+  Xét các đỉnh v kề với u
+    Nếu v chưa visited
+      Đánh dấu v visited
+      Thêm v vào queue</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUTTONS -->
+        <div style="padding: 0 40px 40px 40px; text-align: center;">
+            <button class="btn btn-primary" onclick="generateVisualization()">
+                ✨ Tạo Visualization (Gọi Backend)
+            </button>
+            <button class="btn btn-success" onclick="downloadJSON()">
+                💾 Tải JSON Visualization
+            </button>
+            <button class="btn btn-info" onclick="loadExample()">
+                📖 Tải Ví Dụ Dijkstra
+            </button>
+            <button class="btn btn-warning" onclick="clearAll()">
+                🗑️ Xóa Tất Cả
+            </button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/parse-algorithm';
+
+        function showNotification(message, type = 'success') {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = `notification show ${type}`;
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 4000);
+        }
+
+        function parsePseudocode() {
+            const text = document.getElementById('pseudocode').value;
+            const lines = text.split('\n').filter(l => l.trim());
+
+            return lines.map(line => {
+                // Tách [voice: ...] nếu có
+                const voiceMatch = line.match(/\[voice:\s*([^\]]+)\]/);
+                const voice = voiceMatch ? voiceMatch[1].trim() : '';
+                const cleanLine = line.replace(/\[voice:[^\]]+\]/, '').trim();
+
+                return {
+                    line: cleanLine,
+                    voice: voice
+                };
+            });
+        }
+
+        async function generateVisualization() {
+            try {
+                const name = document.getElementById('algoName').value;
+                const description = document.getElementById('algoDesc').value;
+                const graphText = document.getElementById('graphJSON').value;
+                const startNode = document.getElementById('startNode').value || null;
+                const endNode = document.getElementById('endNode').value || null;
+
+                if (!name || !description) {
+                    showNotification('Vui lòng nhập đầy đủ thông tin!', 'error');
+                    return;
+                }
+
+                const graph = JSON.parse(graphText);
+                const pseudocode = parsePseudocode();
+
+                if (pseudocode.length === 0) {
+                    showNotification('Vui lòng nhập mã giả!', 'error');
+                    return;
+                }
+
+                showNotification('Đang xử lý mã giả...', 'success');
+
+                const requestData = {
+                    name,
+                    description,
+                    pseudocode,
+                    graph,
+                    start_node: startNode,
+                    end_node: endNode
+                };
+
+                console.log('Sending to backend:', requestData);
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const result = await response.json();
+                console.log('Backend response:', result);
+
+                // Lưu vào localStorage để visualizer page có thể dùng
+                localStorage.setItem('generatedAlgorithm', JSON.stringify(result));
+
+                showNotification(`✅ Tạo thành công ${result.steps.length} bước! Mở Visualizer để xem.`, 'success');
+
+                // Auto download JSON
+                downloadJSONData(result);
+
+            } catch (err) {
+                console.error(err);
+                showNotification('❌ Lỗi: ' + err.message, 'error');
+            }
+        }
+
+        function downloadJSON() {
+            try {
+                const name = document.getElementById('algoName').value || 'algorithm';
+                const description = document.getElementById('algoDesc').value;
+                const graphText = document.getElementById('graphJSON').value;
+                const startNode = document.getElementById('startNode').value || null;
+                const endNode = document.getElementById('endNode').value || null;
+
+                const graph = JSON.parse(graphText);
+                const pseudocode = parsePseudocode();
+
+                // Tạo JSON đơn giản để test (không qua backend)
+                const simpleSteps = pseudocode.map((ps, i) => ({
+                    step: `Bước ${i + 1}`,
+                    pseudo: ps.line,
+                    explain: ps.line,
+                    voice: ps.voice || ps.line,
+                    duration: 1500,
+                    colors: ['yellow'],
+                    highlight: {
+                        nodes: [],
+                        edges: []
+                    }
+                }));
+
+                const data = {
+                    algorithm: { name, description },
+                    graph,
+                    start_node: startNode,
+                    end_node: endNode,
+                    steps: simpleSteps
+                };
+
+                downloadJSONData(data);
+                showNotification('✅ Đã tải JSON!', 'success');
+
+            } catch (err) {
+                showNotification('❌ Lỗi: ' + err.message, 'error');
+            }
+        }
+
+        function downloadJSONData(data) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${data.algorithm.name.replace(/\s+/g, '_')}_visualization.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function loadExample() {
+            document.getElementById('algoName').value = 'Thuật toán Dijkstra';
+            document.getElementById('algoDesc').value = 'Tìm đường đi ngắn nhất từ một đỉnh đến các đỉnh khác';
+            document.getElementById('pseudocode').value = `Khởi tạo dist[start] = 0, các đỉnh khác = vô cùng [voice: Bắt đầu thuật toán, khởi tạo khoảng cách]
+Thêm đỉnh start vào Open [voice: Thêm đỉnh xuất phát vào tập Open]
+Lặp khi Open không rỗng
+Lấy đỉnh x từ Open có dist nhỏ nhất [voice: Chọn đỉnh có khoảng cách nhỏ nhất]
+Thêm x vào Close [voice: Đánh dấu đỉnh x đã hoàn thành]
+Xét các đỉnh y kề với x [voice: Kiểm tra các đỉnh láng giềng]
+Nếu y chưa thuộc Close
+Nếu y chưa thuộc Open thì thêm y vào Open
+Nếu dist[y] > dist[x] + weight(x,y) thì cập nhật dist[y] [voice: Cập nhật khoảng cách nếu tìm được đường ngắn hơn]
+Kết thúc thuật toán [voice: Hoàn thành, đã tìm được đường đi ngắn nhất]`;
+            showNotification('✅ Đã tải ví dụ Dijkstra!', 'success');
+        }
+
+        function clearAll() {
+            if (confirm('Xóa tất cả nội dung?')) {
+                document.getElementById('algoName').value = '';
+                document.getElementById('algoDesc').value = '';
+                document.getElementById('pseudocode').value = '';
+                showNotification('🗑️ Đã xóa!', 'success');
+            }
+        }
+
+        // Load ví dụ mặc định khi trang load
+        window.addEventListener('load', () => {
+            console.log('Admin page loaded');
+        });
+    </script>
+</body>
+
+</html>

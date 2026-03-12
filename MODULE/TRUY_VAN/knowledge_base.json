@@ -1,0 +1,55 @@
+{
+    "Methods": {
+        "Dijkstra_algorithm": {
+            "type": "Method",
+            "Def": {
+                "definition": "Thuật toán Dijkstra là thuật toán tham lam tìm đường đi ngắn nhất từ một đỉnh nguồn đến tất cả các đỉnh khác trong đồ thị có trọng số không âm.",
+                "concept": "Các khái niệm chính gồm: greedy choice, relaxation, priority queue, shortest path tree.",
+                "negative_weight_issue": "Dijkstra không dùng được cạnh âm vì khi một đỉnh đã được chọn với khoảng cách nhỏ nhất, thuật toán giả định khoảng cách đó là tối ưu và không cần cập nhật lại. Nếu tồn tại cạnh âm, một đường đi khác có thể làm giảm khoảng cách sau đó, phá vỡ tính chất tham lam.",
+                "correctness_proof": "Tính đúng đắn dựa trên invariant: khi một đỉnh được lấy ra khỏi priority queue, khoảng cách của nó là ngắn nhất. Điều này đúng khi tất cả trọng số không âm.",
+                "comparison_with_prim": "Dijkstra giải bài toán đường đi ngắn nhất. Prim giải bài toán cây khung nhỏ nhất. Hai thuật toán có cấu trúc giống nhau nhưng mục tiêu khác nhau.",
+                "comparison_with_bellman_ford": "Bellman-Ford xử lý được cạnh âm và phát hiện chu trình âm, nhưng chậm hơn Dijkstra.",
+                "time_complexity": "O((V + E) log V) nếu dùng min-heap.",
+                "real_world_applications": "Ứng dụng trong Google Maps, định tuyến mạng, AI game."
+            },
+            "related": [
+                "Bellman_Ford_algorithm",
+                "Prim_algorithm"
+            ]
+        }
+    },
+    "KWs": {
+        "definition": [
+            "định nghĩa",
+            "là gì"
+        ],
+        "concept": [
+            "khái niệm"
+        ],
+        "negative_weight_issue": [
+            "trọng số âm",
+            "cạnh âm"
+        ],
+        "correctness_proof": [
+            "chứng minh",
+            "tính đúng"
+        ],
+        "comparison_with_prim": [
+            "so sánh prim",
+            "dijkstra vs prim"
+        ],
+        "comparison_with_bellman_ford": [
+            "so sánh bellman",
+            "bellman ford"
+        ],
+        "time_complexity": [
+            "độ phức tạp"
+        ],
+        "real_world_applications": [
+            "ứng dụng"
+        ]
+    },
+    "Entities": {
+        "dijkstra": "Dijkstra_algorithm"
+    }
+}

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tiến Lên Miền Nam</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & VARS ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#060c18;
+  --surface:#0f1a2e;
+  --surface2:#162035;
+  --felt:#081910;
+  --border:rgba(34,211,238,.14);
+  --border2:rgba(34,211,238,.28);
+  --cyan:#22d3ee;
+  --blue:#3b82f6;
+  --green:#10b981;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --white:#e2e8f0;
+  --dim:#94a3b8;
+  --muted:#4b5e75;
+  --CW:62px;
+  --CH:90px;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Sora',sans-serif;color:var(--white);user-select:none}
+
+/* ── LAYOUT ── */
+#root{width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;padding:10px 14px 12px;gap:8px;position:relative;z-index:1}
+
+/* ── HEADER ── */
+header{width:100%;max-width:1080px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{font-size:1.4rem;background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 6px rgba(34,211,238,.5))}
+.logo-sub{font-size:.65rem;color:var(--muted);font-weight:600;letter-spacing:.08em}
+.title-wrap{text-align:center}
+.game-title{font-size:clamp(1rem,2.5vw,1.4rem);font-weight:800;background:linear-gradient(90deg,#fff 40%,var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.game-sub{font-size:.6rem;color:var(--muted);letter-spacing:.14em;text-transform:uppercase}
+.stats-pill{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:5px 14px}
+.stat{display:flex;flex-direction:column;align-items:center}
+.stat-v{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;color:var(--cyan);line-height:1}
+.stat-l{font-size:.52rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.sdiv{width:1px;height:20px;background:var(--border)}
+
+/* ── TABLE ── */
+#table{
+  flex:1;width:100%;max-width:1080px;
+  display:grid;
+  grid-template-columns:160px 1fr 160px;
+  grid-template-rows:140px 1fr 140px;
+  background:radial-gradient(ellipse at 50% 50%,#0d2816 0%,var(--felt) 60%,#050d08 100%);
+  border-radius:28px;border:2px solid rgba(16,185,129,.22);
+  box-shadow:0 0 0 5px rgba(16,185,129,.05),0 30px 80px rgba(0,0,0,.8),inset 0 1px 0 rgba(16,185,129,.12);
+  padding:12px;gap:6px;position:relative;overflow:hidden;min-height:0;
+}
+#table::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.006) 0,rgba(255,255,255,.006) 1px,transparent 1px,transparent 7px),repeating-linear-gradient(-45deg,rgba(255,255,255,.006) 0,rgba(255,255,255,.006) 1px,transparent 1px,transparent 7px);pointer-events:none;border-radius:26px}
+
+/* ── GRID AREAS ── */
+#zone-top{grid-column:2;grid-row:1}
+#zone-left{grid-column:1;grid-row:1/4}
+#zone-right{grid-column:3;grid-row:1/4}
+#zone-center{grid-column:2;grid-row:2}
+#zone-bottom{grid-column:2;grid-row:3}
+
+/* ── PLAYER ZONES ── */
+.pzone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative}
+#zone-top{justify-content:flex-start;padding-top:4px}
+#zone-bottom{justify-content:flex-end;padding-bottom:4px}
+#zone-left,#zone-right{gap:8px}
+
+/* player header */
+.phead{display:flex;align-items:center;gap:6px;flex-shrink:0}
+#zone-left .phead,#zone-right .phead{flex-direction:column;gap:3px;text-align:center}
+.avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:.9rem;background:var(--surface);transition:all .3s;flex-shrink:0}
+.avatar.active{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.25),0 0 16px rgba(34,211,238,.4)}
+.pname{font-size:.65rem;font-weight:700;color:var(--dim);letter-spacing:.04em;transition:color .3s}
+.pname.active{color:var(--cyan)}
+.pcnt{font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(0,0,0,.35);border:1px solid var(--border);color:var(--muted)}
+.thinking{font-size:.55rem;color:var(--amber);font-weight:700;letter-spacing:.06em;display:none}
+.thinking.show{display:inline;animation:blink .7s step-start infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── OPPONENT HANDS (face-down, mini cards) ── */
+.ohand{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px}
+#zone-left .ohand,#zone-right .ohand{flex-direction:column;gap:2px;max-height:200px;overflow:hidden}
+
+/* ── CENTER ZONE ── */
+#zone-center{justify-content:center;gap:8px}
+.played-label{font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(16,185,129,.4);display:flex;align-items:center;gap:6px}
+.played-label::before,.played-label::after{content:'';display:block;width:18px;height:1px;background:rgba(16,185,129,.2)}
+#play-area{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:3px;min-height:96px;background:rgba(0,0,0,.18);border:1px dashed rgba(16,185,129,.14);border-radius:14px;padding:10px 12px;position:relative}
+.combo-tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;padding:2px 10px;border-radius:20px;background:var(--surface);border:1px solid var(--border2);color:var(--cyan)}
+#pass-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:16px}
+.pbadge{font-size:.54rem;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(100,116,139,.12);border:1px solid rgba(100,116,139,.22);color:var(--muted)}
+
+/* ── HUMAN HAND ── */
+#hhand-wrap{display:flex;align-items:flex-end;flex-wrap:nowrap;position:relative;padding-bottom:2px;justify-content:center}
+.hcard{margin-left:-20px;z-index:1}
+.hcard:first-child{margin-left:0}
+.hcard:hover .cface,.hcard:hover .cback{transform:translateY(-8px) scale(1.05)}
+.hcard.sel .cface,.hcard.sel .cback{transform:translateY(-14px);box-shadow:0 0 0 2px var(--cyan),0 8px 24px rgba(34,211,238,.45)!important}
+.hcard.sel{z-index:20}
+.hcard:hover{z-index:10}
+
+/* ── CARDS ── */
+.card{width:var(--CW);height:var(--CH);border-radius:8px;cursor:pointer;flex-shrink:0;position:relative}
+.cface{position:absolute;inset:0;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,.1);box-shadow:0 4px 14px rgba(0,0,0,.55),0 1px 3px rgba(0,0,0,.3);display:grid;grid-template-rows:auto 1fr auto;padding:4px 5px;transition:transform .18s ease,box-shadow .18s ease;overflow:hidden}
+.cface.r{color:#cc1a1a}
+.cface.b{color:#0f172a}
+.cc{display:flex;flex-direction:column;align-items:center;line-height:1.05}
+.cr{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:900;line-height:1}
+.cs{font-size:.5rem;line-height:1}
+.cc.bot{align-self:end;transform:rotate(180deg)}
+.cm{display:flex;align-items:center;justify-content:center}
+.csc{font-size:1.5rem;line-height:1}
+.cback{position:absolute;inset:0;border-radius:8px;background:repeating-linear-gradient(45deg,#1a3a8a 0,#1a3a8a 3px,#1e4db5 3px,#1e4db5 6px);border:2px solid #0f2a7a;box-shadow:0 4px 14px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;transition:transform .18s ease,box-shadow .18s ease}
+.cback::before{content:'';position:absolute;inset:4px;border:1px solid rgba(255,255,255,.1);border-radius:5px}
+.cback-logo{font-size:1rem;opacity:.45}
+
+/* mini (opponent) cards */
+.mcard{width:28px;height:40px;border-radius:5px;flex-shrink:0}
+.mcard .cback{border-radius:5px;border-width:1px}
+.mcard .cback-logo{font-size:.6rem}
+
+/* played card anim */
+@keyframes popIn{from{opacity:0;transform:scale(.75) translateY(-10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.panim{animation:popIn .28s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes dealIn{from{opacity:0;transform:translateY(-40px) scale(.8) rotate(-6deg)}to{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
+.deal{animation:dealIn .35s cubic-bezier(.34,1.56,.64,1) forwards}
+
+/* ── CONTROLS ── */
+#ctrl{width:100%;max-width:1080px;display:flex;align-items:center;justify-content:center;gap:10px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:'Sora',sans-serif;font-weight:700;font-size:.85rem;border:none;border-radius:12px;cursor:pointer;padding:11px 22px;transition:all .22s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.btn:active{transform:scale(.95)!important}
+.btn:disabled{opacity:.3;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn-play{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#05101e;box-shadow:0 5px 20px rgba(34,211,238,.3)}
+.btn-play:hover:not(:disabled){transform:translateY(-2px) scale(1.04);box-shadow:0 10px 30px rgba(34,211,238,.45)}
+.btn-pass{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;box-shadow:0 5px 20px rgba(239,68,68,.28)}
+.btn-pass:hover:not(:disabled){transform:translateY(-2px) scale(1.04);box-shadow:0 10px 30px rgba(239,68,68,.4)}
+.btn-sec{background:var(--surface);color:var(--dim);border:1px solid var(--border2)}
+.btn-sec:hover:not(:disabled){background:var(--surface2);color:var(--white);transform:translateY(-2px)}
+.btn-sec.sort:hover:not(:disabled){border-color:var(--amber)}
+.bi{font-size:.95rem}
+
+/* ── TURN INDICATOR ── */
+.turn-ind{font-size:.6rem;color:var(--cyan);font-weight:700;letter-spacing:.1em;text-transform:uppercase;display:none;align-items:center;gap:4px;animation:blink .8s step-start infinite}
+.turn-ind.show{display:flex}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:68px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(15,26,46,.96);border:1px solid var(--border2);border-radius:40px;padding:9px 20px;font-size:.78rem;font-weight:600;color:var(--white);opacity:0;pointer-events:none;transition:all .3s ease;z-index:200;white-space:nowrap;backdrop-filter:blur(12px);box-shadow:0 6px 28px rgba(0,0,0,.5)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── RESULT ── */
+#result{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:150;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(0)}
+#result.show{opacity:1;pointer-events:auto;backdrop-filter:blur(3px)}
+#result.wbg{background:rgba(34,211,238,.04)}
+#result.lbg{background:rgba(239,68,68,.04)}
+.rcard{background:rgba(5,12,24,.96);border:1px solid var(--border2);border-radius:26px;padding:28px 48px 24px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.85);transform:scale(.85);transition:transform .4s cubic-bezier(.34,1.56,.64,1);backdrop-filter:blur(20px);min-width:280px}
+#result.show .rcard{transform:scale(1)}
+.remoji{font-size:2.8rem;display:block;margin-bottom:10px;animation:popIn .5s .1s cubic-bezier(.34,1.56,.64,1) both}
+.rtitle{font-size:1.7rem;font-weight:900;letter-spacing:-.5px;margin-bottom:5px}
+.rtitle.w{color:var(--cyan);text-shadow:0 0 28px rgba(34,211,238,.55)}
+.rtitle.l{color:var(--red);text-shadow:0 0 28px rgba(239,68,68,.55)}
+.rsub{font-size:.78rem;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.score-list{width:100%;margin-bottom:18px}
+.score-row{display:flex;align-items:center;gap:10px;padding:4px 0;font-size:.76rem}
+.score-row .medal{font-size:1rem;width:24px;text-align:center}
+.score-row .sname{flex:1;text-align:left;font-weight:700}
+.score-row.p1 .sname{color:var(--amber)}
+.score-row.p2 .sname{color:var(--cyan)}
+.score-row.p3 .sname{color:var(--dim)}
+.score-row.p4 .sname{color:var(--red)}
+.score-row .srank{color:var(--muted);font-size:.68rem}
+.btn-again{display:inline-flex;align-items:center;gap:7px;font-family:'Sora',sans-serif;font-weight:700;font-size:.85rem;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#05101e;border:none;border-radius:12px;cursor:pointer;padding:11px 26px;box-shadow:0 5px 20px rgba(34,211,238,.3);transition:all .22s}
+.btn-again:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 10px 30px rgba(34,211,238,.45)}
+
+/* ── BG canvas ── */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.25}
+
+/* ── RESPONSIVE ── */
+@media(max-height:680px){:root{--CW:52px;--CH:76px}#table{grid-template-columns:140px 1fr 140px;grid-template-rows:120px 1fr 120px}}
+@media(max-width:580px){:root{--CW:46px;--CH:67px}#table{grid-template-columns:110px 1fr 110px;grid-template-rows:110px 1fr 110px}.hcard{margin-left:-16px}}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<div id="root">
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">♠</div>
+      <div>
+        <div class="logo-sub">ALGOVIZ</div>
+        <div class="logo-sub" style="margin-top:-2px;color:#2a3a50;font-size:.55rem">GAMES</div>
+      </div>
+    </div>
+    <div class="title-wrap">
+      <div class="game-title">Tiến Lên Miền Nam</div>
+      <span class="game-sub">Southern Vietnamese Poker</span>
+    </div>
+    <div class="stats-pill">
+      <div class="stat"><div class="stat-v" id="sv-w">0</div><div class="stat-l">Thắng</div></div>
+      <div class="sdiv"></div>
+      <div class="stat"><div class="stat-v" id="sv-l">0</div><div class="stat-l">Thua</div></div>
+      <div class="sdiv"></div>
+      <div class="stat"><div class="stat-v" id="sv-r">1</div><div class="stat-l">Ván</div></div>
+    </div>
+  </header>
+
+  <!-- TABLE -->
+  <div id="table">
+    <!-- TOP: Bot 0 -->
+    <div class="pzone" id="zone-top">
+      <div class="phead">
+        <div class="avatar" id="av-0">🤖</div>
+        <div>
+          <div class="pname" id="pn-0">Bot A</div>
+          <div class="pcnt" id="pc-0">13 lá</div>
+        </div>
+        <span class="thinking" id="th-0">Đang nghĩ…</span>
+      </div>
+      <div class="ohand" id="oh-0"></div>
+    </div>
+
+    <!-- LEFT: Bot 1 -->
+    <div class="pzone" id="zone-left">
+      <div class="phead">
+        <div class="avatar" id="av-1">🤖</div>
+        <div style="text-align:center">
+          <div class="pname" id="pn-1">Bot B</div>
+          <div class="pcnt" id="pc-1">13 lá</div>
+        </div>
+        <span class="thinking" id="th-1">Đang nghĩ…</span>
+      </div>
+      <div class="ohand" id="oh-1" style="flex-direction:column"></div>
+    </div>
+
+    <!-- CENTER -->
+    <div class="pzone" id="zone-center">
+      <div class="played-label">Bài Đã Đánh</div>
+      <div id="play-area"><span id="play-hint" style="font-size:.7rem;color:var(--muted)">Chưa có bài nào</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="combo-tag" id="combo-tag" style="display:none">—</span>
+      </div>
+      <div id="pass-row"></div>
+    </div>
+
+    <!-- RIGHT: Bot 2 -->
+    <div class="pzone" id="zone-right">
+      <div class="phead">
+        <div class="avatar" id="av-2">🤖</div>
+        <div style="text-align:center">
+          <div class="pname" id="pn-2">Bot C</div>
+          <div class="pcnt" id="pc-2">13 lá</div>
+        </div>
+        <span class="thinking" id="th-2">Đang nghĩ…</span>
+      </div>
+      <div class="ohand" id="oh-2" style="flex-direction:column"></div>
+    </div>
+
+    <!-- BOTTOM: Human (player index 3) -->
+    <div class="pzone" id="zone-bottom">
+      <div class="phead">
+        <div class="avatar" id="av-3">😊</div>
+        <div>
+          <div class="pname" id="pn-3">Bạn</div>
+          <div class="pcnt" id="pc-3">13 lá</div>
+        </div>
+        <span class="turn-ind" id="ti">▶ Lượt bạn</span>
+      </div>
+      <div id="hhand-wrap"></div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div id="ctrl">
+    <button class="btn btn-sec" id="btn-new" onclick="startGame()"><span class="bi">🔄</span>Ván mới</button>
+    <button class="btn btn-sec sort" id="btn-sort" onclick="sortHuman()"><span class="bi">🗂️</span>Sắp xếp</button>
+    <button class="btn btn-play" id="btn-play" disabled onclick="humanPlay()"><span class="bi">🃏</span>Đánh bài</button>
+    <button class="btn btn-pass" id="btn-pass" disabled onclick="humanPass()"><span class="bi">⏭️</span>Bỏ lượt</button>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div id="result">
+  <div class="rcard">
+    <span class="remoji" id="r-emoji">🏆</span>
+    <div class="rtitle" id="r-title">Bạn Thắng!</div>
+    <div class="rsub" id="r-sub">Xuất sắc!</div>
+    <div class="score-list" id="r-scores"></div>
+    <button class="btn-again" onclick="startGame();document.getElementById('result').className=''">🔄 Chơi lại</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════
+   1. CONSTANTS
+═══════════════════════════════════ */
+// Ranks: 3 smallest, 2 biggest
+const RANKS  = ['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
+const SUITS  = ['♠','♣','♦','♥'];   // ♠ < ♣ < ♦ < ♥
+const NAMES  = ['Bot A','Bot B','Bot C','Bạn'];
+const HUMAN  = 3;
+
+/* ═══════════════════════════════════
+   2. CARD HELPERS
+═══════════════════════════════════ */
+function cardVal(c){
+  return RANKS.indexOf(c.r)*4 + SUITS.indexOf(c.s);
+}
+function cmp(a,b){ return cardVal(a)-cardVal(b); }
+function isRed(s){ return s==='♦'||s==='♥'; }
+
+function makeDeck(){
+  const d=[];
+  for(const s of SUITS) for(const r of RANKS) d.push({r,s});
+  return d;
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=0|Math.random()*(i+1);
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ═══════════════════════════════════
+   3. COMBO DETECTION
+   Returns null if invalid, else {type, key, len, cards, label}
+   Types: single|pair|triple|quad|straight|pairchain
+═══════════════════════════════════ */
+function detect(cards){
+  if(!cards||!cards.length) return null;
+  const s = [...cards].sort(cmp);
+  const n = s.length;
+
+  // ── Single ──
+  if(n===1) return {type:'single', key:cardVal(s[0]), len:1, cards:s, label:'Đơn'};
+
+  // ── Pairs / Triple / Quad (all same rank) ──
+  const allSame = s.every(c=>c.r===s[0].r);
+  if(allSame){
+    if(n===2) return {type:'pair',  key:cardVal(s[1]), len:2, cards:s, label:'Đôi'};
+    if(n===3) return {type:'triple',key:cardVal(s[2]), len:3, cards:s, label:'Ba cây'};
+    if(n===4) return {type:'quad',  key:cardVal(s[3]), len:4, cards:s, label:'Tứ quý'};
+    return null;
+  }
+
+  // No combo with 2 allowed (except single 2 and pair/triple/quad 2)
+  if(s.some(c=>c.r==='2')) return null;
+
+  // ── Straight (3+ consecutive ranks, each unique rank) ──
+  if(n>=3){
+    let isStraight=true;
+    for(let i=0;i<n-1;i++){
+      if(RANKS.indexOf(s[i+1].r)-RANKS.indexOf(s[i].r)!==1){isStraight=false;break;}
+    }
+    if(isStraight) return {type:'straight', key:cardVal(s[n-1]), len:n, cards:s, label:`Sảnh ${n} lá`};
+  }
+
+  // ── Pair chain: even number ≥4 of consecutive pairs ──
+  if(n>=4 && n%2===0){
+    let ok=true;
+    const pairRanks=[];
+    for(let i=0;i<n;i+=2){
+      if(s[i].r!==s[i+1].r){ok=false;break;}
+      pairRanks.push(s[i].r);
+    }
+    if(ok){
+      for(let i=0;i<pairRanks.length-1;i++){
+        if(RANKS.indexOf(pairRanks[i+1])-RANKS.indexOf(pairRanks[i])!==1){ok=false;break;}
+      }
+    }
+    if(ok) return {type:'pairchain', key:cardVal(s[n-1]), len:n/2, cards:s, label:`${n/2} đôi thông`};
+  }
+
+  return null;
+}
+
+/* ═══════════════════════════════════
+   4. BEAT CHECK
+═══════════════════════════════════ */
+function canBeat(prev, next){
+  // No previous → anything goes
+  if(!prev) return true;
+  const p=prev, n=next;
+
+  // Special chặt (cut): quad beats single-2 or pair-2; pairchain ≥3 beats single-2; pairchain ≥4 beats pair-2
+  if(p.type==='single' && p.cards[0].r==='2'){
+    if(n.type==='quad') return true;
+    if(n.type==='pairchain' && n.len>=3) return true;
+  }
+  if(p.type==='pair' && p.cards[0].r==='2'){
+    if(n.type==='quad') return true;
+    if(n.type==='pairchain' && n.len>=4) return true;
+  }
+
+  // Quad beats quad
+  if(p.type==='quad' && n.type==='quad') return n.key>p.key;
+
+  // Normal: same type required
+  if(n.type!==p.type) return false;
+  // Same length for straight and pairchain
+  if((p.type==='straight'||p.type==='pairchain') && n.len!==p.len) return false;
+  return n.key > p.key;
+}
+
+/* ═══════════════════════════════════
+   5. AI LOGIC
+═══════════════════════════════════ */
+// Find all pairs grouped by rank (from sorted hand, no 2s)
+function getPairMap(hand){
+  const map={};
+  for(const c of hand){
+    if(c.r==='2') continue;
+    if(!map[c.r]) map[c.r]=[];
+    map[c.r].push(c);
+  }
+  return map;
+}
+
+function aiPick(hand, prev, isFree){
+  const sorted = [...hand].sort(cmp);
+
+  // Free move (starts new round)
+  if(isFree || !prev){
+    // Play lowest non-2 single; if all 2s, play lowest
+    const non2 = sorted.filter(c=>c.r!=='2');
+    const target = non2.length ? non2[0] : sorted[0];
+    return {type:'single', key:cardVal(target), len:1, cards:[target], label:'Đơn'};
+  }
+
+  const p = prev;
+  let best = null; // smallest valid combo to beat prev
+
+  const tryBetter = (combo) => {
+    if(!canBeat(p, combo)) return;
+    if(!best || combo.key < best.key) best = combo;
+  };
+
+  if(p.type==='single'){
+    // Try singles higher
+    for(const c of sorted){
+      const combo={type:'single',key:cardVal(c),len:1,cards:[c],label:'Đơn'};
+      if(canBeat(p,combo)) tryBetter(combo);
+    }
+    // Try chặt if prev is 2
+    if(p.cards[0].r==='2'){
+      const q = findQuad(sorted);
+      if(q) tryBetter(q);
+      const pc3 = findPairChain(sorted,3);
+      if(pc3) tryBetter(pc3);
+    }
+  }
+  else if(p.type==='pair'){
+    // Try pairs
+    const pm = getPairMap(sorted);
+    for(const r of Object.keys(pm)){
+      if(pm[r].length>=2 && RANKS.indexOf(r)>RANKS.indexOf(p.cards[0].r)){
+        const combo={type:'pair',key:cardVal(pm[r][1]),len:2,cards:pm[r].slice(0,2),label:'Đôi'};
+        tryBetter(combo);
+      }
+    }
+    // Also higher pair of same rank category
+    // chặt if prev pair is 2
+    if(p.cards[0].r==='2'){
+      const q = findQuad(sorted);
+      if(q) tryBetter(q);
+      const pc4 = findPairChain(sorted,4);
+      if(pc4) tryBetter(pc4);
+    }
+  }
+  else if(p.type==='triple'){
+    // Group triples
+    const cnt={};
+    for(const c of sorted){ cnt[c.r]=(cnt[c.r]||0)+1; }
+    for(const r of Object.keys(cnt)){
+      if(cnt[r]>=3 && RANKS.indexOf(r)>RANKS.indexOf(p.cards[0].r)){
+        const cards=sorted.filter(c=>c.r===r).slice(0,3);
+        const combo={type:'triple',key:cardVal(cards[2]),len:3,cards,label:'Ba cây'};
+        tryBetter(combo);
+      }
+    }
+  }
+  else if(p.type==='quad'){
+    const q = findQuad(sorted);
+    if(q && q.key > p.key) tryBetter(q);
+  }
+  else if(p.type==='straight'){
+    const straights = findAllStraights(sorted, p.len);
+    for(const st of straights) tryBetter(st);
+  }
+  else if(p.type==='pairchain'){
+    const pcs = findAllPairChains(sorted, p.len);
+    for(const pc of pcs) tryBetter(pc);
+  }
+
+  return best || null; // null = pass
+}
+
+function findQuad(sorted){
+  const cnt={};
+  for(const c of sorted){ cnt[c.r]=(cnt[c.r]||0)+1; }
+  for(const r of Object.keys(cnt)){
+    if(cnt[r]>=4){
+      const cards=sorted.filter(c=>c.r===r).slice(0,4);
+      return {type:'quad',key:cardVal(cards[3]),len:4,cards,label:'Tứ quý'};
+    }
+  }
+  return null;
+}
+
+function findAllStraights(sorted, len){
+  const nonTwo = sorted.filter(c=>c.r!=='2');
+  const res=[];
+  for(let i=0; i<=nonTwo.length-len; i++){
+    const sub=nonTwo.slice(i,i+len);
+    let ok=true;
+    for(let j=0;j<sub.length-1;j++){
+      if(RANKS.indexOf(sub[j+1].r)-RANKS.indexOf(sub[j].r)!==1){ok=false;break;}
+    }
+    if(ok) res.push({type:'straight',key:cardVal(sub[len-1]),len,cards:sub,label:`Sảnh ${len} lá`});
+  }
+  return res;
+}
+
+function findAllPairChains(sorted, numPairs){
+  const pm = getPairMap(sorted);
+  const pairRanks = Object.keys(pm).filter(r=>pm[r].length>=2).sort((a,b)=>RANKS.indexOf(a)-RANKS.indexOf(b));
+  const res=[];
+  for(let i=0; i<=pairRanks.length-numPairs; i++){
+    let ok=true;
+    for(let j=0;j<numPairs-1;j++){
+      if(RANKS.indexOf(pairRanks[i+j+1])-RANKS.indexOf(pairRanks[i+j])!==1){ok=false;break;}
+    }
+    if(ok){
+      const cards=[];
+      for(let j=0;j<numPairs;j++) cards.push(...pm[pairRanks[i+j]].slice(0,2));
+      cards.sort(cmp);
+      res.push({type:'pairchain',key:cardVal(cards[cards.length-1]),len:numPairs,cards,label:`${numPairs} đôi thông`});
+    }
+  }
+  return res;
+}
+
+function findPairChain(sorted, minPairs){
+  for(let n=minPairs;;n++){
+    const chains = findAllPairChains(sorted, n);
+    if(chains.length) return chains[0];
+    // no more possible
+    const pm=getPairMap(sorted);
+    const pairRanks=Object.keys(pm).filter(r=>pm[r].length>=2);
+    if(pairRanks.length<n) break;
+    if(n>10) break;
+  }
+  return null;
+}
+
+/* ═══════════════════════════════════
+   6. GAME STATE
+═══════════════════════════════════ */
+let G = {
+  hands:[[],[],[],[]],
+  current:0,
+  prev:null,       // last played combo
+  prevBy:-1,       // who played it
+  passes:new Set(),
+  finished:[],
+  state:'idle',    // idle | playing | ended
+  stats:{w:0,l:0,round:0},
+  selected:[],     // human selected indices
+};
+
+function startGame(){
+  const deck = shuffle(makeDeck());
+  G.hands = [deck.slice(0,13),deck.slice(13,26),deck.slice(26,39),deck.slice(39,52)];
+  G.hands[HUMAN].sort(cmp);
+  G.current = 0;
+  G.prev = null;
+  G.prevBy = -1;
+  G.passes = new Set();
+  G.finished = [];
+  G.state = 'playing';
+  G.selected = [];
+  G.stats.round++;
+
+  // Who has 3♠?
+  for(let i=0;i<4;i++){
+    if(G.hands[i].some(c=>c.r==='3'&&c.s==='♠')){G.current=i;break;}
+  }
+
+  document.getElementById('result').className='';
+  renderAll(true);
+  updateStat();
+  toast('🃏 Ván mới! Ai có 3♠ đi trước.');
+  if(G.current!==HUMAN) scheduleAI();
+}
+
+/* ── play action ── */
+function doPlay(pi, cards){
+  const combo = detect(cards);
+  if(!combo) return {ok:false,msg:'Bộ bài không hợp lệ!'};
+
+  // First turn rule: must contain 3♠
+  if(G.prev===null && G.prevBy===-1){
+    if(!cards.some(c=>c.r==='3'&&c.s==='♠'))
+      return {ok:false,msg:'Phải đánh bài chứa 3♠ ở lượt đầu!'};
+  }
+
+  if(!canBeat(G.prev, combo))
+    return {ok:false,msg:'Bài không ăn được!'};
+
+  // Remove cards
+  const usedVals = cards.map(cardVal);
+  G.hands[pi] = G.hands[pi].filter(c=>{
+    const v=cardVal(c);
+    const idx=usedVals.indexOf(v);
+    if(idx>=0){usedVals.splice(idx,1);return false;}
+    return true;
+  });
+
+  G.prev = combo;
+  G.prevBy = pi;
+  G.passes = new Set();
+
+  // Finished?
+  if(G.hands[pi].length===0){
+    G.finished.push(pi);
+    if(G.finished.length===3){
+      G.state='ended';
+      // last player
+      for(let i=0;i<4;i++) if(!G.finished.includes(i)) G.finished.push(i);
+      if(G.finished[0]===HUMAN) G.stats.w++; else G.stats.l++;
+    }
+  }
+  return {ok:true, combo};
+}
+
+/* ── advance turn ── */
+function nextTurn(){
+  // Find next non-finished player
+  let next=(G.current+1)%4;
+  for(let i=0;i<4;i++){
+    if(!G.finished.includes(next)) break;
+    next=(next+1)%4;
+  }
+  G.current=next;
+
+  // Check if all others passed → winner leads free
+  const active=[0,1,2,3].filter(p=>!G.finished.includes(p));
+  const allPassed = active.every(p=>p===G.prevBy||G.passes.has(p));
+  if(allPassed && G.prevBy!==-1){
+    G.current=G.prevBy;
+    G.prev=null;
+    G.prevBy=-1;
+    G.passes=new Set();
+  }
+}
+
+/* ═══════════════════════════════════
+   7. HUMAN ACTIONS
+═══════════════════════════════════ */
+function humanPlay(){
+  if(G.state!=='playing'||G.current!==HUMAN) return;
+  if(!G.selected.length){toast('⚠️ Chọn lá bài trước!');return;}
+  const cards = G.selected.map(i=>G.hands[HUMAN][i]);
+  const res = doPlay(HUMAN, cards);
+  if(!res.ok){toast('⚠️ '+res.msg);return;}
+  G.selected=[];
+  renderHuman();
+  showPlayed(res.combo);
+  updateCount(HUMAN);
+  updateStat();
+  if(G.state==='ended'){setTimeout(showResult,700);return;}
+  nextTurn();
+  updateAvatars();
+  updateButtons();
+  if(G.current!==HUMAN) scheduleAI();
+}
+
+function humanPass(){
+  if(G.state!=='playing'||G.current!==HUMAN) return;
+  if(!G.prev||G.prevBy===HUMAN){toast('⚠️ Không thể bỏ khi đang dẫn!');return;}
+  G.passes.add(HUMAN);
+  G.selected=[];
+  renderHuman();
+  renderPassRow();
+  nextTurn();
+  updateAvatars();
+  updateButtons();
+  if(G.current!==HUMAN) scheduleAI();
+}
+
+function sortHuman(){
+  G.hands[HUMAN].sort(cmp);
+  G.selected=[];
+  renderHuman();
+}
+
+function toggleCard(idx){
+  if(G.state!=='playing'||G.current!==HUMAN) return;
+  const pos=G.selected.indexOf(idx);
+  if(pos>=0) G.selected.splice(pos,1);
+  else G.selected.push(idx);
+  renderHuman();
+  updateButtons();
+}
+
+/* ═══════════════════════════════════
+   8. AI TURN
+═══════════════════════════════════ */
+function scheduleAI(){
+  if(G.state!=='playing'||G.current===HUMAN) {
+    const pi=G.current;
+    setThinking(pi,true);
+    updateAvatars();
+    const delay = 550+Math.random()*550;
+    setTimeout(()=>runAI(pi), delay);
+  }
+}
+
+function runAI(pi){
+  if(G.state!=='playing'||G.current!==pi){setThinking(pi,false);return;}
+  setThinking(pi,false);
+
+  const isFree = (!G.prev || G.prevBy===pi);
+  const choice = aiPick(G.hands[pi], G.prev, isFree);
+
+  if(!choice){
+    // Pass
+    G.passes.add(pi);
+    renderPassRow();
+    toast(`${NAMES[pi]}: Bỏ lượt`);
+    nextTurn();
+    updateAvatars();
+    updateButtons();
+    if(G.current===HUMAN){
+      // Human's turn
+    } else {
+      scheduleAI();
+    }
+    return;
+  }
+
+  // Play choice
+  const res = doPlay(pi, choice.cards);
+  if(!res.ok){
+    // Shouldn't happen, but fallback: pass
+    G.passes.add(pi);
+    renderPassRow();
+    nextTurn();
+    updateAvatars();
+    updateButtons();
+    if(G.current!==HUMAN) scheduleAI();
+    return;
+  }
+
+  renderOpp(pi);
+  showPlayed(res.combo);
+  updateCount(pi);
+  toast(`${NAMES[pi]} đánh: ${res.combo.label}`);
+
+  if(G.state==='ended'){
+    setTimeout(showResult,700);
+    return;
+  }
+  nextTurn();
+  updateAvatars();
+  updateButtons();
+  if(G.current===HUMAN){
+    // Human's turn now
+  } else {
+    scheduleAI();
+  }
+}
+
+/* ═══════════════════════════════════
+   9. RENDER HELPERS
+═══════════════════════════════════ */
+function makeCardEl(card, faceDown, mini, animate){
+  const wrap = document.createElement('div');
+  wrap.className = 'card'+(mini?' mcard':'');
+
+  if(faceDown){
+    wrap.innerHTML=`<div class="cback"><span class="cback-logo">🂠</span></div>`;
+  } else {
+    const cls = isRed(card.s)?'r':'b';
+    wrap.innerHTML=`<div class="cface ${cls}">
+      <div class="cc"><div class="cr">${card.r}</div><div class="cs">${card.s}</div></div>
+      <div class="cm"><div class="csc">${card.s}</div></div>
+      <div class="cc bot"><div class="cr">${card.r}</div><div class="cs">${card.s}</div></div>
+    </div>`;
+  }
+  if(animate) wrap.classList.add('deal');
+  return wrap;
+}
+
+function renderHuman(animate){
+  const wrap=document.getElementById('hhand-wrap');
+  wrap.innerHTML='';
+  G.hands[HUMAN].forEach((c,i)=>{
+    const el=makeCardEl(c,false,false,animate);
+    el.classList.add('hcard');
+    if(G.selected.includes(i)) el.classList.add('sel');
+    el.addEventListener('click',()=>toggleCard(i));
+    el.style.animationDelay=animate?`${i*38}ms`:'0ms';
+    wrap.appendChild(el);
+  });
+  updateCount(HUMAN);
+}
+
+function renderOpp(pi, animate){
+  const el=document.getElementById('oh-'+pi);
+  el.innerHTML='';
+  G.hands[pi].forEach((_,i)=>{
+    const c=makeCardEl(null,true,true,animate);
+    if(animate) c.style.animationDelay=`${i*25}ms`;
+    el.appendChild(c);
+  });
+  updateCount(pi);
+}
+
+function renderAll(animate){
+  for(let i=0;i<3;i++) renderOpp(i,animate);
+  renderHuman(animate);
+  showPlayed(G.prev);
+  renderPassRow();
+  updateAvatars();
+  updateButtons();
+}
+
+function showPlayed(combo){
+  const area=document.getElementById('play-area');
+  const hint=document.getElementById('play-hint');
+  const tag=document.getElementById('combo-tag');
+  area.innerHTML='';
+
+  if(!combo){
+    hint.style.display='';
+    area.appendChild(hint);
+    tag.style.display='none';
+    return;
+  }
+  hint.style.display='none';
+  tag.style.display='';
+  tag.textContent=combo.label||combo.type;
+
+  combo.cards.forEach((c,i)=>{
+    const el=makeCardEl(c,false,false,false);
+    el.classList.add('panim');
+    el.style.animationDelay=`${i*45}ms`;
+    el.style.cursor='default';
+    area.appendChild(el);
+  });
+}
+
+function renderPassRow(){
+  const row=document.getElementById('pass-row');
+  row.innerHTML='';
+  G.passes.forEach(pi=>{
+    const s=document.createElement('span');
+    s.className='pbadge';
+    s.textContent=`${NAMES[pi]}: Bỏ`;
+    row.appendChild(s);
+  });
+}
+
+function updateCount(pi){
+  const n=G.hands[pi].length;
+  document.getElementById('pc-'+pi).textContent=`${n} lá`;
+}
+
+function updateAvatars(){
+  for(let i=0;i<4;i++){
+    const av=document.getElementById('av-'+i);
+    const nm=document.getElementById('pn-'+i);
+    if(G.state==='playing'&&G.current===i){
+      av.classList.add('active');
+      nm.classList.add('active');
+    } else {
+      av.classList.remove('active');
+      nm.classList.remove('active');
+    }
+  }
+  document.getElementById('ti').className='turn-ind'+(G.state==='playing'&&G.current===HUMAN?' show':'');
+}
+
+function updateButtons(){
+  const myTurn=G.state==='playing'&&G.current===HUMAN;
+  document.getElementById('btn-play').disabled=!myTurn||!G.selected.length;
+  const canPass=myTurn&&G.prev&&G.prevBy!==HUMAN;
+  document.getElementById('btn-pass').disabled=!canPass;
+}
+
+function setThinking(pi,on){
+  const el=document.getElementById('th-'+pi);
+  if(el) el.className='thinking'+(on?' show':'');
+}
+
+function updateStat(){
+  document.getElementById('sv-w').textContent=G.stats.w;
+  document.getElementById('sv-l').textContent=G.stats.l;
+  document.getElementById('sv-r').textContent=G.stats.round;
+}
+
+/* ═══════════════════════════════════
+   10. RESULT SCREEN
+═══════════════════════════════════ */
+function showResult(){
+  const medals=['🥇','🥈','🥉','💀'];
+  const rankCls=['p1','p2','p3','p4'];
+  const humanPos=G.finished.indexOf(HUMAN);
+  const isWin=humanPos===0;
+
+  document.getElementById('r-emoji').textContent=isWin?'🏆':'😔';
+  const rtEl=document.getElementById('r-title');
+  rtEl.textContent=isWin?'Bạn Thắng!':'Thua Rồi!';
+  rtEl.className='rtitle '+(isWin?'w':'l');
+  const subs=['Xuất sắc! Bạn về nhất! 🎉','Về nhì — không tệ!','Về ba — cố lên!','Về bét — thử lại nào!'];
+  document.getElementById('r-sub').textContent=subs[humanPos]||'';
+
+  const sl=document.getElementById('r-scores');
+  sl.innerHTML='';
+  G.finished.forEach((pi,rank)=>{
+    const row=document.createElement('div');
+    row.className='score-row '+rankCls[rank];
+    row.innerHTML=`<span class="medal">${medals[rank]}</span><span class="sname">${NAMES[pi]}</span><span class="srank">Hạng ${rank+1}</span>`;
+    sl.appendChild(row);
+  });
+
+  const ol=document.getElementById('result');
+  ol.className='show '+(isWin?'wbg':'lbg');
+}
+
+/* ═══════════════════════════════════
+   11. TOAST
+═══════════════════════════════════ */
+let _tt;
+function toast(msg,dur=2400){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+/* ═══════════════════════════════════
+   12. BACKGROUND PARTICLES
+═══════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('bg');
+  const cx=cv.getContext('2d');
+  let W,H;
+  const N=32,MAX=125;
+  const pts=[];
+  class P{
+    constructor(){
+      this.x=Math.random()*W;this.y=Math.random()*H;
+      this.vx=(Math.random()-.5)*.28;this.vy=(Math.random()-.5)*.28;
+      this.r=Math.random()*1.4+.4;
+      this.col=Math.random()>.5?'34,211,238':'59,130,246';
+    }
+    step(){
+      this.x+=this.vx;this.y+=this.vy;
+      if(this.x<0||this.x>W)this.vx*=-1;
+      if(this.y<0||this.y>H)this.vy*=-1;
+    }
+    draw(){
+      cx.beginPath();cx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      cx.fillStyle=`rgba(${this.col},.55)`;cx.fill();
+    }
+  }
+  const resize=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;};
+  resize();
+  for(let i=0;i<N;i++) pts.push(new P());
+  (function loop(){
+    cx.clearRect(0,0,W,H);
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
+        if(d<MAX){
+          cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);
+          cx.strokeStyle=`rgba(34,211,238,${(1-d/MAX)*.14})`;cx.lineWidth=1;cx.stroke();
+        }
+      }
+      pts[i].step();pts[i].draw();
+    }
+    requestAnimationFrame(loop);
+  })();
+  window.addEventListener('resize',resize,{passive:true});
+})();
+
+/* ═══════════════════════════════════
+   13. KEYBOARD
+═══════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  if(e.repeat) return;
+  if(e.key==='Enter'||e.key==='n') startGame();
+  if(e.key===' '){e.preventDefault();if(!document.getElementById('btn-play').disabled)humanPlay();}
+  if(e.key==='p'||e.key==='P'){if(!document.getElementById('btn-pass').disabled)humanPass();}
+  if(e.key==='s'||e.key==='S') sortHuman();
+});
+
+/* ═══════════════════════════════════
+   14. BOOT
+═══════════════════════════════════ */
+setTimeout(()=>{
+  toast('🃏 Nhấn "Ván mới" để bắt đầu!  [Space]=Đánh  [P]=Bỏ  [S]=Sắp xếp');
+},400);
+</script>
+</body>
+</html> 

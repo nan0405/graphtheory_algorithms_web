@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Visualizer - Minh Họa Thuật Toán</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: flex;
+            height: calc(100vh - 200px);
+        }
+
+        /* CONTROLS PANEL */
+        .controls {
+            width: 280px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 2px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 20px;
+        }
+
+        .control-section label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .control-section input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85em;
+        }
+
+        .control-section input[type="file"]:hover {
+            background: #f0f0ff;
+            border-color: #764ba2;
+        }
+
+        .control-section input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .algorithm-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+            display: none;
+        }
+
+        .algorithm-info h3 {
+            color: #1976d2;
+            margin-bottom: 5px;
+            font-size: 1em;
+        }
+
+        .algorithm-info p {
+            color: #666;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        /* CANVAS AREA */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        #graph {
+            flex: 1;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf1 100%);
+        }
+
+        /* CONTROLS FOOTER */
+        .controls-footer {
+            background: #f8f9fa;
+            padding: 15px;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls-footer button {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls-footer button:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .speed-control label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .speed-control input[type="range"] {
+            width: 100px;
+        }
+
+        /* EXPLANATION PANEL */
+        .explanation-wrapper {
+            width: 0;
+            background: #f8f9fa;
+            border-left: 2px solid #e0e0e0;
+            overflow: hidden;
+            transition: width 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .explanation-wrapper.open {
+            width: 400px;
+        }
+
+        .explanation-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .explanation-panel h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        #explanation {
+            margin-bottom: 20px;
+        }
+
+        .step-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .step-item:hover {
+            border-left-color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-item.active {
+            background: #e3f2fd;
+            border-left-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .step-item .step-number {
+            font-weight: 600;
+            color: #667eea;
+            display: block;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+
+        .step-item .step-explain {
+            color: #666;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        /* EYE BUTTON */
+        #eye-toggle {
+            position: fixed;
+            right: 30px;
+            top: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.8em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #eye-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* NOTIFICATION */
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            font-weight: 600;
+            z-index: 200;
+            max-width: 350px;
+        }
+
+        #notification.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        #notification.success {
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        #notification.error {
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .color-legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .color-legend h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+
+        .legend-color.yellow {
+            background: #ffc107;
+        }
+
+        .legend-color.red {
+            background: #e53935;
+        }
+
+        .legend-color.green {
+            background: #00e676;
+        }
+
+        .legend-color.blue {
+            background: #1976d2;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .controls {
+                width: 100%;
+                border-right: none;
+                border-bottom: 2px solid #e0e0e0;
+            }
+
+            .explanation-wrapper.open {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Algorithm Visualizer</h1>
+            <p>Minh Họa Thuật Toán - Nhập JSON từ Admin</p>
+        </div>
+
+        <div class="content">
+            <!-- CONTROLS PANEL -->
+            <div class="controls" id="controlsPanel">
+                <div class="control-section">
+                    <label>📁 Upload File JSON</label>
+                    <input type="file" id="jsonInput" accept=".json" onchange="loadAlgorithmFromJSON(event)">
+                </div>
+
+                <div id="algorithmInfoBox" class="algorithm-info">
+                    <h3 id="algoTitle">-</h3>
+                    <p id="algoDesc">-</p>
+                </div>
+
+                <div class="control-section">
+                    <label>🎯 Start Node (tùy chọn)</label>
+                    <input type="text" id="startNodeInput" placeholder="VD: a" />
+                </div>
+
+                <div class="control-section">
+                    <label>🏁 End Node (tùy chọn)</label>
+                    <input type="text" id="endNodeInput" placeholder="VD: f" />
+                </div>
+
+                <button class="btn btn-primary" onclick="loadAndStart()">▶️ Chạy Thuật Toán</button>
+                <button class="btn btn-secondary" onclick="resetVisualization()">🔄 Reset</button>
+                <button class="btn btn-secondary" onclick="downloadJSON()">⬇️ Tải JSON Mẫu</button>
+
+                <div class="color-legend">
+                    <h4>💡 Ghi Chú Màu</h4>
+                    <div class="legend-item">
+                        <span class="legend-color yellow"></span>
+                        Chờ xét
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color red"></span>
+                        Đang xét
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color green"></span>
+                        Cập nhật
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color blue"></span>
+                        Đã chốt
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS AREA -->
+            <div class="canvas-area">
+                <svg id="graph" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+
+                <!-- CONTROLS FOOTER -->
+                <div class="controls-footer">
+                    <button onclick="prevStep()" title="Bước trước">⏮</button>
+                    <button id="playPauseBtn" onclick="togglePlayPause()" title="Play/Pause">▶</button>
+                    <button onclick="nextStep()" title="Bước tiếp">⏭</button>
+                    <div class="speed-control">
+                        <label for="speedSlider" title="Tốc độ">⚡</label>
+                        <input type="range" id="speedSlider" min="500" max="3000" value="1000" step="100"
+                            oninput="updateSpeed(this.value)" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPLANATION PANEL -->
+            <div class="explanation-wrapper" id="explanationWrapper">
+                <div class="explanation-panel">
+                    <h3>📋 Giải Thích Từng Bước</h3>
+                    <div id="explanation"></div>
+                    <h3 style="margin-top: 20px;">📝 Danh Sách Bước</h3>
+                    <div id="stepsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EYE TOGGLE BUTTON -->
+    <button id="eye-toggle" onclick="toggleExplanationPanel()">👀</button>
+
+    <!-- NOTIFICATION -->
+    <div id="notification"></div>
+
+    <script src="./visualizer.js"></script>
+</body>
+
+</html>

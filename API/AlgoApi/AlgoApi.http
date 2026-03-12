@@ -1,0 +1,6 @@
+@AlgoApi_HostAddress = http://localhost:5107
+
+GET {{AlgoApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

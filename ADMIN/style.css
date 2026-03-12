@@ -1,0 +1,499 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --bg-main: #0f172a;
+    /* navy đậm - nền chính dark */
+    --bg-secondary: #1e293b;
+    /* navy nhạt hơn - card, sidebar */
+    --bg-tertiary: #334155;
+    /* viền, hover */
+    --text-primary: #f1f5f9;
+    /* trắng xám nhẹ - text chính */
+    --text-secondary: #94a3b8;
+    /* xám - phụ */
+    --accent: #38bdf8;
+    /* xanh cyan sáng - điểm nhấn */
+    --accent-dark: #0284c7;
+    /* xanh navy đậm hơn khi hover/active */
+    --danger: #f87171;
+    --success: #34d399;
+    --border: #334155;
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    --radius-md: 12px;
+    --radius-lg: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+}
+
+.logo {
+    padding: 1.8rem 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.nav-label {
+    padding: 1.5rem 1.5rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nav-item {
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.nav-item.active {
+    background: rgba(56, 189, 248, 0.12);
+    color: var(--accent);
+    border-left: 4px solid var(--accent);
+    font-weight: 500;
+}
+
+/* Main content */
+.main-wrapper {
+    margin-left: 260px;
+    flex: 1;
+    padding: 2.5rem;
+    background: var(--bg-main);
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1.8rem;
+    color: white;
+}
+
+.content-tab {
+    display: none;
+}
+
+.content-tab.active {
+    display: block;
+}
+
+.header-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.8rem;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #0f172a;
+    border: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #0ea5e9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(56, 189, 248, 0.25);
+}
+
+/* Table */
+.data-table-container {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: rgba(30, 41, 59, 0.7);
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+}
+
+tr:hover {
+    background: rgba(51, 65, 85, 0.4);
+}
+
+/* Content list item (theory, exercise) */
+.content-item {
+    background: var(--bg-secondary);
+    padding: 1.2rem 1.6rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+}
+
+.content-item:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.btn-edit {
+    background: rgba(2, 132, 199, 0.15);
+    color: #38bdf8;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.btn-delete {
+    background: rgba(248, 113, 113, 0.15);
+    color: var(--danger);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Graph area - cải thiện rất nhiều */
+.graph-interface {
+    display: flex;
+    gap: 1.5rem;
+    height: 75vh;
+    /* linh hoạt hơn */
+    min-height: 620px;
+}
+
+.graph-sidebar {
+    width: 280px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 1.2rem;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.list-container {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.graph-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.canvas-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+#g-name {
+    flex: 1;
+    padding: 0.8rem 1.2rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 1rem;
+}
+
+.canvas-container {
+    flex: 1;
+    background: #020617;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid #1e293b;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+#graph-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.85);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    width: 90%;
+    max-width: 820px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    padding: 1.8rem;
+    color: var(--text-primary);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.close {
+    font-size: 1.8rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.form-input,
+.opt-text {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.option-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Edge weight overlay & delete overlay */
+.edge-overlay,
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(6px);
+}
+
+.edge-modal,
+.overlay-box {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 380px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+#edge-weight-input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.3rem;
+    text-align: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: white;
+}
+
+.btn-confirm {
+    background: var(--accent);
+    color: #0f172a;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+/* Hover & focus chung */
+button:focus,
+input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+}
+
+/* Nút Tạo mới trong sidebar đồ thị */
+.btn-sm.btn-create-graph {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: transparent;
+    border: 2px dashed var(--accent);
+    color: var(--accent);
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-sm.btn-create-graph:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-style: solid;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(56, 189, 248, 0.25);
+}
+
+.btn-sm.btn-create-graph:active {
+    transform: translateY(0);
+}
+
+/* Hiệu ứng ripple (giữ nguyên ý tưởng bạn có) */
+.btn-sm.btn-create-graph::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(56, 189, 248, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    pointer-events: none;
+}
+
+.btn-sm.btn-create-graph:active::after {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+}
+
+.canvas-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    /* khoảng cách giữa các phần tử */
+    flex-wrap: wrap;
+    /* nếu màn hình nhỏ thì xuống dòng */
+    margin-bottom: 1rem;
+}
+
+#g-name {
+    flex: 1;
+    /* chiếm hết không gian còn lại */
+    min-width: 200px;
+    padding: 0.8rem 1.2rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 1rem;
+}
+
+/* Nút Reset / Tạo mới */
+.btn-reset {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    padding: 0.7rem 1.3rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.btn-reset:hover {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: #0ea5e9;
+    transform: translateY(-1px);
+}
+
+.btn-reset:active {
+    transform: translateY(0);
+}
+
+/* Nút Lưu lại (đã có sẵn, chỉ tinh chỉnh nhẹ cho cân đối) */
+.btn-primary {
+    background: var(--accent);
+    color: #0f172a;
+    border: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.btn-primary:hover {
+    background: #0ea5e9;
+    transform: translateY(-1px);
+}

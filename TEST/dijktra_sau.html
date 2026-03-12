@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Dijkstra Algorithm Visualization - Combined</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+</head>
+
+<body>
+    <div id="controls">
+        <div id="normal-buttons">
+            <!-- JSON Upload Section -->
+            <div class="input-vertical-stack">
+                <div class="input-field">
+                    <label>📁 Upload JSON Algorithm</label>
+                    <input type="file" id="jsonInput" accept=".json" onchange="loadAlgorithmFromJSON(event)" />
+                </div>
+                <div class="input-field">
+                    <label>Start Node</label>
+                    <input type="text" id="startNodeInput" placeholder="VD: A" maxlength="5" />
+                </div>
+                <div class="input-field">
+                    <label>End Node</label>
+                    <input type="text" id="endNodeInput" placeholder="VD: F" maxlength="5" />
+                </div>
+            </div>
+
+            <button onclick="runAlgorithm()">▶️ Run Algorithm</button>
+
+            <button onclick="showCreate()">Create Graph</button>
+            <div id="createForm" style="display: none">
+                <div class="input-group">
+                    <label>Node Name</label>
+                    <input type="text" id="nodeName" />
+                    <button onclick="addNode()">Add Node</button>
+                    <button onclick="removeNode()">Remove Node</button>
+                </div>
+                <div class="input-group">
+                    <label>From - To - Value</label>
+                    <input type="text" id="fromNode" placeholder="From" />
+                    <input type="text" id="toNode" placeholder="To" />
+                    <input type="number" id="edgeValue" placeholder="Value" />
+                    <button onclick="addEdge()">Add Edge</button>
+                    <button onclick="removeEdge()">Remove Edge</button>
+                </div>
+            </div>
+            <button onclick="resetGraph()">Reset</button>
+            <button onclick="renderRandomGraphFromDB()">Random</button>
+        </div>
+    </div>
+
+    <div id="floating-menu-container">
+        <button id="floating-menu-btn" onclick="toggleMenu()">Chỉnh sửa đồ thị</button>
+        <div id="floating-menu-dropdown" class="dropdown-content">
+            <button onclick="backToEditMode(); showCreate()">Create Graph</button>
+            <button onclick="backToEditMode(); resetGraph()">Reset</button>
+            <button onclick="backToEditMode(); randomGraph()">Random</button>
+        </div>
+    </div>
+
+    <div id="eye" onclick="toggleExplanation()">
+        <span>
+            <h1>👀</h1>
+            <h4>Hiện thuật giải</h4>
+        </span>
+    </div>
+
+    <div id="content-wrapper">
+        <div id="main">
+            <div id="canvas">
+                <svg id="graph" viewBox="0 0 600 500" preserveAspectRatio="xMidYMid meet"></svg>
+                <div id="color-legend">
+                    <h4>Ghi chú màu</h4>
+                    <div class="legend-item">
+                        <span class="legend-color yellow"></span> Chờ xét
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color red"></span> Đang xét
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color green"></span> Cập nhật Dist
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color blue"></span> Đỉnh đã chốt
+                    </div>
+                </div>
+            </div>
+
+            <div id="footer">
+                <button onclick="prevStep()">⮜</button>
+                <button id="playPauseBtn" onclick="togglePlayPause()">▶</button>
+                <button onclick="nextStep()">⮞</button>
+                <label>Speed: <input type="range" min="1" max="5" value="3" id="speed"
+                        oninput="updateSpeed(this.value)" /></label>
+            </div>
+        </div>
+
+        <div id="explanation-wrapper">
+            <div id="steps">
+                <h3>STEP — DIJKSTRA</h3>
+                <div id="dynamic-steps-area"></div>
+            </div>
+
+            <div id="pseudocode-panel">
+                <h3>PSEUDOCODE — DIJKSTRA</h3>
+                <div id="pseudocode-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification"></div>
+    <script src="./dijkstra_sau.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,163 @@
+{
+    "name": "Dijkstra",
+    "description": "Thuật toán Dijkstra tìm đường đi ngắn nhất từ đỉnh nguồn",
+    "init": {
+        "openSet": "emptySet",
+        "closedSet": "emptySet"
+    },
+    "program": {
+        "type": "Block",
+        "statements": [
+            {
+                "type": "Assign",
+                "left": "dist[startNode]",
+                "right": 0,
+                "pseudo": "1.2 Dist[bắt đầu] = 0",
+                "voice": "Khởi tạo khoảng cách của đỉnh bắt đầu bằng 0"
+            },
+            {
+                "type": "FunctionCall",
+                "func": "queue.add",
+                "args": [
+                    "openSet",
+                    "startNode"
+                ],
+                "pseudo": "1.4 Open = { startNode }",
+                "voice": "Thêm đỉnh bắt đầu vào tập Open"
+            },
+            {
+                "type": "While",
+                "condition": {
+                    "type": "NotEmpty",
+                    "target": "openSet"
+                },
+                "pseudo": "Bước 2: Lặp khi Open chưa rỗng",
+                "voice": "Bắt đầu vòng lặp chính",
+                "body": {
+                    "type": "Block",
+                    "statements": [
+                        {
+                            "type": "Assign",
+                            "left": "currentNode",
+                            "right": {
+                                "type": "ExtractMin",
+                                "queueVar": "openSet",
+                                "distVar": "dist",
+                                "pseudo": "2.1 Lấy x thuộc Open có Dist(x) nhỏ nhất",
+                                "voice": "Chọn đỉnh có khoảng cách nhỏ nhất từ tập Open"
+                            },
+                            "pseudo": "2.1 currentNode = argmin Dist trong openSet",
+                            "voice": "Lấy đỉnh có khoảng cách nhỏ nhất"
+                        },
+                        {
+                            "type": "FunctionCall",
+                            "func": "set.add",
+                            "args": [
+                                "closedSet",
+                                "currentNode"
+                            ],
+                            "pseudo": "2.2 Thêm x vào Close",
+                            "voice": "Chốt đỉnh đang xét vào tập Close"
+                        },
+                        {
+                            "type": "If",
+                            "condition": {
+                                "type": "BinaryExpression",
+                                "operator": "==",
+                                "left": "currentNode",
+                                "right": "endNode"
+                            },
+                            "pseudo": "Kiểm tra đã đến đích chưa",
+                            "voice": "Kiểm tra xem có phải đỉnh đích không",
+                            "consequent": {
+                                "type": "Return",
+                                "pseudo": "Tìm thấy đích — kết thúc",
+                                "voice": "Đã tìm thấy đỉnh đích, kết thúc thuật toán"
+                            }
+                        },
+                        {
+                            "type": "ForEachNeighbor",
+                            "nodeVar": "currentNode",
+                            "neighborVar": "neighborNode",
+                            "edgeWeightVar": "edgeWeight",
+                            "pseudo": "2.3 Xét các đỉnh y kề với x không thuộc Close",
+                            "voice": "Duyệt qua các đỉnh kề với đỉnh đang xét",
+                            "body": {
+                                "type": "Block",
+                                "statements": [
+                                    {
+                                        "type": "If",
+                                        "condition": {
+                                            "type": "NotInSet",
+                                            "itemVar": "neighborNode",
+                                            "setVar": "closedSet"
+                                        },
+                                        "pseudo": "Bỏ qua đỉnh đã chốt",
+                                        "voice": "Kiểm tra đỉnh kề có thuộc Close không",
+                                        "consequent": {
+                                            "type": "Block",
+                                            "statements": [
+                                                {
+                                                    "type": "Assign",
+                                                    "left": "newDist",
+                                                    "right": {
+                                                        "type": "BinaryExpression",
+                                                        "operator": "+",
+                                                        "left": "dist[currentNode]",
+                                                        "right": "edgeWeight"
+                                                    },
+                                                    "pseudo": "Tính w(x) + w(x,y)",
+                                                    "voice": "Tính khoảng cách mới qua đỉnh đang xét"
+                                                },
+                                                {
+                                                    "type": "If",
+                                                    "condition": {
+                                                        "type": "BinaryExpression",
+                                                        "operator": "<",
+                                                        "left": "newDist",
+                                                        "right": "dist[neighborNode]"
+                                                    },
+                                                    "pseudo": "2.3.1 / 2.3.2 Nếu khoảng cách mới tốt hơn",
+                                                    "voice": "Nếu đường đi mới ngắn hơn, cập nhật khoảng cách",
+                                                    "consequent": {
+                                                        "type": "Block",
+                                                        "statements": [
+                                                            {
+                                                                "type": "Assign",
+                                                                "left": "dist[neighborNode]",
+                                                                "right": "newDist",
+                                                                "pseudo": "Cập nhật Dist(y) = w(x) + w(x,y)",
+                                                                "voice": "Cập nhật khoảng cách ngắn nhất của đỉnh kề"
+                                                            },
+                                                            {
+                                                                "type": "Assign",
+                                                                "left": "prev[neighborNode]",
+                                                                "right": "currentNode",
+                                                                "pseudo": "Cập nhật Prev(y) = x",
+                                                                "voice": "Cập nhật đỉnh cha trên đường đi ngắn nhất"
+                                                            },
+                                                            {
+                                                                "type": "FunctionCall",
+                                                                "func": "queue.add",
+                                                                "args": [
+                                                                    "openSet",
+                                                                    "neighborNode"
+                                                                ],
+                                                                "pseudo": "Thêm y vào Open nếu chưa có",
+                                                                "voice": "Thêm đỉnh kề vào tập Open để xét tiếp"
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
