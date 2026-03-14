@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Dijkstra Algorithm Visualization</title>
+    <audio id="audio" src="../deijjtra/dijkstra_explain.mp3"></audio>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./bfs.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+</head>
+
+<body>
+    <div id="controls">
+
+        <div id="normal-buttons">
+            <span class="panel-section-label">Configuration</span>
+
+            <div class="control-group">
+                <label for="text-input">Nhập đề bài đồ thị:</label>
+                <textarea id="text-input" rows="5" placeholder="Nhập đề bài tại đây..."></textarea>
+                <button id="extract-text-btn" class="primary-btn" onclick="handleExtractText()">
+                    <i class="fa-solid fa-microchip"></i> Phân tích và Vẽ đồ thị
+                </button>
+            </div>
+
+            <div class="panel-section-label">AI Graph Recognition</div>
+            <div class="control-group">
+                <label for="image-input">Upload Graph Image:</label>
+                <input type="file" id="image-input" accept="image/*" style="display: none;">
+                <button onclick="document.getElementById('image-input').click()" class="secondary-btn">
+                    <i class="fa-solid fa-file-image"></i> Choose Image
+                </button>
+                <button id="extract-btn" class="primary-btn" style="margin-top: 10px; width: 100%;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Extract Graph
+                </button>
+            </div>
+            <div id="loading-status" style="color: #3498db; font-size: 0.8em; margin-top: 5px; display: none;">
+                Processing image...
+            </div>
+            <div class="input-vertical-stack">
+                <div class="input-field">
+                    <label>Start Node</label>
+                    <input type="text" id="startNodeInput" placeholder="VD: A" maxlength="5" />
+                </div>
+                <!-- <div class="input-field">
+                    <label>End Node</label>
+                    <input type="text" id="endNodeInput" placeholder="VD: F" maxlength="5" />
+                </div> -->
+            </div>
+            <button onclick="showCreate()">Create Graph</button>
+            <div id="createForm" style="display: none">
+                <div class="input-group">
+                    <label>Node Name</label>
+                    <input type="text" id="nodeName" />
+                    <button onclick="addNode()">Add Node</button>
+                    <button onclick="removeNode()">Remove Node</button>
+                </div>
+                <div class="input-group">
+                    <label>From - To - Value</label>
+                    <input type="text" id="fromNode" placeholder="From" />
+                    <input type="text" id="toNode" placeholder="To" />
+                    <input type="number" id="edgeValue" placeholder="Value" />
+                    <button onclick="addEdge()">Add Edge</button>
+                    <button onclick="removeEdge()">Remove Edge</button>
+                </div>
+            </div>
+            <button onclick="resetGraph()">Reset</button>
+            <button onclick="renderRandomGraphFromDB()">Random</button>
+        </div>
+    </div>
+
+
+
+
+    <div id="floating-menu-container">
+        <button id="floating-menu-btn" onclick="toggleMenu()">Chỉnh sửa đồ thị</button>
+        <div id="floating-menu-dropdown" class="dropdown-content">
+            <button onclick="backToEditMode(); showCreate()">Create Graph</button>
+            <button onclick="backToEditMode(); resetGraph()">Reset</button>
+            <button onclick="backToEditMode(); randomGraph()">Random</button>
+        </div>
+    </div>
+    </div>
+
+    <div id="eye" onclick="toggleExplanation()">
+        <span>
+            <h1>👀</h1>
+            <h4> Hiện thuật giải</h4>
+        </span>
+    </div>
+
+
+    <div id="content-wrapper">
+        <div id="main">
+            <div id="canvas">
+                <svg id="graph" viewBox="0 0 600 500" preserveAspectRatio="xMidYMid meet"></svg>
+                <div id="color-legend">
+                    <h4>Ghi chú màu</h4>
+                    <div class="legend-item">
+                        <span class="legend-color yellow"></span> Chờ xét
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color red"></span> Đang xét
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color green"></span> Cập nhật Dist
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color blue"></span> Đỉnh đã chốt
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div id="footer">
+                <button onclick="prevStep()">⏮</button>
+                <button id="playPauseBtn" onclick="togglePlayPause()">▶</button>
+                <button onclick="nextStep()">⏭</button>
+                <button id="toggleVoice" onclick="toggleVoice()">🔊 Voice: ON</button>
+                <label>Speed: <input type="range" min="1" max="5" value="3" id="speed" /></label>
+                <audio id="audio" src="./dijkstra_explain.mp3"></audio>
+            </div>
+        </div>
+
+
+        <div id="explanation-wrapper">
+            <div id="steps">
+                <h3>STEP – BFS</h3>
+                <div id="dynamic-steps-area"></div>
+                <div id="state-display">
+                    <h3>Trạng thái</h3>
+
+                    <!-- <div id="stateT" class="state-item">T = {}</div>
+                    <div id="stateQ" class="state-item">Q = {}</div>
+                    <div id="stateH" class="state-item">H = {}</div>
+                    <div id="dist-state" class="state-item">Dist = {}</div>
+                    <div id="pre-state" class="state-item">Pre = {}</div> -->
+
+                    <div id="stateT" class="state-item"></div>
+                    <div id="stateQ" class="state-item"></div>
+                    <div id="stateH" class="state-item"></div>
+                </div>
+            </div>
+
+            <div id="pseudocode-panel">
+                <h3>PSEUDOCODE – BFS (QUEUE)</h3>
+                <pre>
+                    <span data-pc="init-open">Bước 1: Khởi tạo Open = [s], Close = [ ]</span>
+
+                    <span data-pc="loop">Bước 2: Lặp cho đến khi Open rỗng:</span>
+                    <span data-pc="pop">    2.1 Lấy đỉnh A ở đầu Open ra (Dequeue)</span>
+                    <span data-pc="check">    2.2 Nếu A chưa được duyệt</span>
+                    <span data-pc="add-close">        Thêm A vào Close (đánh dấu đã duyệt)</span>
+                    <span data-pc="neighbors">        Xét các đỉnh P kề A</span>
+                    <span data-pc="push">        Nếu P chưa được xét → Thêm P vào cuối Open </span>
+
+                    <span data-pc="result">Bước 3: Xuất tập đỉnh trong Close</span>
+                </pre>
+            </div>
+
+
+        </div>
+
+
+
+
+    </div>
+
+
+    <div id="notification"></div>
+    <script src="./bfs.js"></script>
+</body>
+
+</html>
